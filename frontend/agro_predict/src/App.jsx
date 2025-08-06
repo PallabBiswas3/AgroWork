@@ -1,35 +1,112 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
+import ChatPage from "./pages/ChatPage";
+import RegisterPage from "./pages/RegisterPage";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+// Authentication Context
+const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+// Auth Provider Component
+const AuthProvider = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Check localStorage for existing login state
+    const savedAuth = localStorage.getItem('agrowork-auth');
+    if (savedAuth) {
+      const authData = JSON.parse(savedAuth);
+      setIsAuthenticated(authData.isAuthenticated);
+      setUser(authData.user);
+    }
+  }, []);
+
+  const login = (userData) => {
+    setIsAuthenticated(true);
+    setUser(userData);
+    localStorage.setItem('agrowork-auth', JSON.stringify({
+      isAuthenticated: true,
+      user: userData
+    }));
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setUser(null);
+    localStorage.removeItem('agrowork-auth');
+  };
+
+  const register = (userData) => {
+    setIsAuthenticated(true);
+    setUser(userData);
+    localStorage.setItem('agrowork-auth', JSON.stringify({
+      isAuthenticated: true,
+      user: userData
+    }));
+  };
+
+  const value = {
+    isAuthenticated,
+    user,
+    login,
+    logout,
+    register
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            
+            {/* Protected Routes */}
+            <Route path="/home" element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chat/:category" element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Default redirects */}
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

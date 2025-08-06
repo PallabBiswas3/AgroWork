@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
+import translationService from "../services/translationService";
+import LanguageSelector from "../components/LanguageSelector";
 import "./ChatPage.css";
 
 const ChatPage = () => {
@@ -21,6 +23,9 @@ const ChatPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAttachments, setShowAttachments] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [userLanguage, setUserLanguage] = useState('en');
+  const [detectedLanguage, setDetectedLanguage] = useState('en');
+  const [isTranslating, setIsTranslating] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -41,10 +46,33 @@ const ChatPage = () => {
   const handleSend = async () => {
     if (input.trim() === "" && !selectedFile) return;
 
+    // Detect language of user input
+    setIsTranslating(true);
+    let detectedLang = 'en';
+    let englishInput = input;
+    
+    try {
+      detectedLang = await translationService.detectLanguage(input);
+      setDetectedLanguage(detectedLang);
+
+      // Translate user input to English for model processing
+      if (detectedLang !== 'en') {
+        englishInput = await translationService.translateText(input, detectedLang, 'en');
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      // Continue with original input if translation fails
+      detectedLang = 'en';
+      englishInput = input;
+    }
+
     const newMessage = {
       id: Date.now(),
       role: "user",
-      content: input,
+      content: input, // Keep original input for display
+      originalContent: input,
+      englishContent: englishInput, // Store English version for model
+      detectedLanguage: detectedLang,
       timestamp: new Date(),
       avatar: "👤",
       attachment: selectedFile
@@ -54,16 +82,33 @@ const ChatPage = () => {
     setInput("");
     setSelectedFile(null);
     setShowAttachments(false);
+    setIsTranslating(false);
 
     // Show typing indicator
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    // Simulate AI response (in real implementation, this would call your model)
+    setTimeout(async () => {
+      // Simulate model response in English
+      const modelResponse = `I understand you're asking about "${englishInput}". Here's a helpful response from the ${category} model. This is a simulated response to demonstrate the chat interface.`;
+      
+      // Translate model response to user's language
+      let translatedResponse = modelResponse;
+      try {
+        if (detectedLang !== 'en') {
+          translatedResponse = await translationService.translateText(modelResponse, 'en', detectedLang);
+        }
+      } catch (error) {
+        console.error('Response translation error:', error);
+        // Use original response if translation fails
+        translatedResponse = modelResponse;
+      }
+
       const aiResponse = {
         id: Date.now() + 1,
         role: "ai",
-        content: `I understand you're asking about "${input}". Here's a helpful response from the ${category} model. This is a simulated response to demonstrate the chat interface.`,
+        content: translatedResponse,
+        originalContent: modelResponse, // Store English version
         timestamp: new Date(),
         avatar: "🤖"
       };
@@ -130,6 +175,10 @@ const ChatPage = () => {
           </div>
         </div>
         <div className="header-actions">
+          <LanguageSelector 
+            selectedLanguage={userLanguage}
+            onLanguageChange={setUserLanguage}
+          />
           <button 
             className="theme-toggle"
             onClick={() => setIsDarkMode(!isDarkMode)}
@@ -170,6 +219,21 @@ const ChatPage = () => {
             </div>
           ))}
           
+          {/* Translation Indicator */}
+          {isTranslating && (
+            <div className="message-wrapper ai">
+              <div className="message-bubble">
+                <div className="message-header">
+                  <span className="message-avatar">🌐</span>
+                  <span className="message-time">Now</span>
+                </div>
+                <div className="translation-indicator">
+                  <span>Translating...</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Typing Indicator */}
           {isTyping && (
             <div className="message-wrapper ai">

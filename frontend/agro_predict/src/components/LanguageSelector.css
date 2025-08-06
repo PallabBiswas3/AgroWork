@@ -1,0 +1,118 @@
+.language-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.language-selector-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-secondary, #f5f5f5);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.language-selector-button:hover {
+  background: var(--bg-hover, #e8e8e8);
+  border-color: var(--border-hover, #d0d0d0);
+}
+
+.language-selector-button.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.language-name {
+  font-weight: 500;
+  flex: 1;
+  text-align: left;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.language-selector-button:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.language-option:hover {
+  background: var(--bg-hover, #f5f5f5);
+}
+
+.language-option.selected {
+  background: var(--primary-color, #007bff);
+  color: white;
+}
+
+.language-flag {
+  font-size: 16px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.check-mark {
+  margin-left: auto;
+  font-weight: bold;
+}
+
+/* Dark mode support */
+.dark-mode .language-selector-button {
+  background: var(--bg-secondary-dark, #2a2a2a);
+  border-color: var(--border-color-dark, #404040);
+  color: var(--text-primary-dark, #ffffff);
+}
+
+.dark-mode .language-selector-button:hover {
+  background: var(--bg-hover-dark, #3a3a3a);
+  border-color: var(--border-hover-dark, #505050);
+}
+
+.dark-mode .language-dropdown {
+  background: var(--bg-secondary-dark, #2a2a2a);
+  border-color: var(--border-color-dark, #404040);
+  color: var(--text-primary-dark, #ffffff);
+}
+
+.dark-mode .language-option:hover {
+  background: var(--bg-hover-dark, #3a3a3a);
+}
+
+.dark-mode .language-option.selected {
+  background: var(--primary-color-dark, #0056b3);
+} 

@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import ChatPage from "./pages/ChatPage";
 import RegisterPage from "./pages/RegisterPage";
+import TranslationTester from "./components/TranslationTester";
 import "./App.css";
 
 // Authentication Context
@@ -96,6 +97,11 @@ function App() {
             <Route path="/chat/:category" element={
               <ProtectedRoute>
                 <ChatPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/test-translation" element={
+              <ProtectedRoute>
+                <TranslationTester />
               </ProtectedRoute>
             } />
             

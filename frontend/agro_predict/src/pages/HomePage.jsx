@@ -185,18 +185,6 @@ const HomePage = () => {
                 <span className="btn-icon">→</span>
               </button>
             </div>
-            
-            <div className="feature-card" onClick={() => navigate('/test-translation')}>
-              <div className="feature-icon">🌐</div>
-              <h3 className="feature-title">Translation Tester</h3>
-              <p className="feature-description">
-                Test multi-language support and translation functionality with various languages.
-              </p>
-              <button className="feature-btn">
-                Test Translation
-                <span className="btn-icon">→</span>
-              </button>
-            </div>
           </div>
         </div>
       </section>

@@ -313,19 +313,6 @@
 	}
 }
 
-.translation-indicator {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	color: var(--text-secondary, #666);
-	font-style: italic;
-	padding: 8px 0;
-}
-
-.translation-indicator span {
-	animation: pulse 1.5s infinite ease-in-out;
-}
-
 /* Input Container */
 .input-container {
 	padding: 20px 24px;

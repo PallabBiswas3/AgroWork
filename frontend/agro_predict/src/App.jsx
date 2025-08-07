@@ -4,6 +4,8 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import ChatPage from "./pages/ChatPage";
 import RegisterPage from "./pages/RegisterPage";
+import CropRecommendation from "./pages/CropRecommendation";
+import DiseasePestDashboard from "./pages/DiseasePestDashboard";
 import "./App.css";
 
 // Authentication Context
@@ -96,6 +98,16 @@ function App() {
             <Route path="/chat/:category" element={
               <ProtectedRoute>
                 <ChatPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/crop-recommendation" element={
+              <ProtectedRoute>
+                <CropRecommendation />
+              </ProtectedRoute>
+            } />
+            <Route path="/disease-pest-dashboard" element={
+              <ProtectedRoute>
+                <DiseasePestDashboard />
               </ProtectedRoute>
             } />
             

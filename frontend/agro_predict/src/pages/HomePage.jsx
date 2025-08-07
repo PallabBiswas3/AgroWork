@@ -149,6 +149,30 @@ const HomePage = () => {
                 <span className="btn-icon">→</span>
               </button>
             </div>
+            {/* Disease & Pest Dashboard Card */}
+            <div className="feature-card" onClick={() => navigate('/disease-pest-dashboard')}>
+              <div className="feature-icon">🦠</div>
+              <h3 className="feature-title">Disease & Pest Dashboard</h3>
+              <p className="feature-description">
+                Detect plant diseases, predict pest risks, and manage treatments in one place.
+              </p>
+              <button className="feature-btn">
+                Open Dashboard
+                <span className="btn-icon">→</span>
+              </button>
+            </div>
+            {/* Crop Recommendation Card */}
+            <div className="feature-card" onClick={() => navigate('/crop-recommendation')}>
+              <div className="feature-icon">🌾</div>
+              <h3 className="feature-title">Crop Recommendation</h3>
+              <p className="feature-description">
+                Get smart crop suggestions based on your soil, weather, and location parameters.
+              </p>
+              <button className="feature-btn">
+                Try Now
+                <span className="btn-icon">→</span>
+              </button>
+            </div>
             
             <div className="feature-card" onClick={() => handleFeatureClick('pest')}>
               <div className="feature-icon">🐛</div>
@@ -314,6 +338,8 @@ const HomePage = () => {
                 <li><a href="#about">About</a></li>
                 <li><a href="#services">Services</a></li>
                 <li><a href="#contact">Contact</a></li>
+                <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                <li><a href="/disease-pest-dashboard">Disease & Pest Dashboard</a></li>
               </ul>
             </div>
             

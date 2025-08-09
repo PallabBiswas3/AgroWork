@@ -138,77 +138,76 @@ const HomePage = () => {
           </div>
           
           <div className="features-grid">
-            <div className="feature-card" onClick={() => handleFeatureClick('soil')}>
+            <div 
+              className="feature-card" 
+              onClick={() => navigate('/crop-recommendation')}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="feature-icon">🌱</div>
-              <h3 className="feature-title">Soil Advisor</h3>
+              <h3 className="feature-title">Crop Advisor</h3>
               <p className="feature-description">
-                Analyze soil composition, pH levels, and nutrient content for optimal crop planning.
+                Get personalized crop recommendations based on your soil and climate conditions.
               </p>
-              <button className="feature-btn">
-                Start Chat
+              <div className="feature-btn">
+                Get Started
                 <span className="btn-icon">→</span>
-              </button>
+              </div>
             </div>
-            {/* Disease & Pest Dashboard Card */}
+            
+            <div 
+              className="feature-card" 
+              onClick={() => navigate('/soil-analysis')}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="feature-icon">🧪</div>
+              <h3 className="feature-title">Soil Analysis</h3>
+              <p className="feature-description">
+                Get detailed soil health report and fertilizer recommendations.
+              </p>
+              <div className="feature-btn">
+                Analyze Now
+                <span className="btn-icon">→</span>
+              </div>
+            </div>
+            
             <div className="feature-card" onClick={() => navigate('/disease-pest-dashboard')}>
-              <div className="feature-icon">🦠</div>
-              <h3 className="feature-title">Disease & Pest Dashboard</h3>
+              <div className="feature-icon">🔍</div>
+              <h3 className="feature-title">Disease Detector</h3>
               <p className="feature-description">
-                Detect plant diseases, predict pest risks, and manage treatments in one place.
-              </p>
-              <button className="feature-btn">
-                Open Dashboard
-                <span className="btn-icon">→</span>
-              </button>
-            </div>
-            {/* Crop Recommendation Card */}
-            <div className="feature-card" onClick={() => navigate('/crop-recommendation')}>
-              <div className="feature-icon">🌾</div>
-              <h3 className="feature-title">Crop Recommendation</h3>
-              <p className="feature-description">
-                Get smart crop suggestions based on your soil, weather, and location parameters.
-              </p>
-              <button className="feature-btn">
-                Try Now
-                <span className="btn-icon">→</span>
-              </button>
-            </div>
-            
-            <div className="feature-card" onClick={() => handleFeatureClick('pest')}>
-              <div className="feature-icon">🐛</div>
-              <h3 className="feature-title">Pest Detector</h3>
-              <p className="feature-description">
-                Identify pests and diseases from photos with instant treatment recommendations.
+                Upload plant images to identify diseases and get treatment recommendations.
               </p>
               <button className="feature-btn">
                 Start Chat
                 <span className="btn-icon">→</span>
               </button>
             </div>
+          
             
-            <div className="feature-card" onClick={() => handleFeatureClick('weather')}>
-              <div className="feature-icon">🌤️</div>
-              <h3 className="feature-title">Weather Assistant</h3>
+            <div className="feature-card" onClick={() => navigate('/environmental-monitoring')}>
+              <div className="feature-icon">🌍</div>
+              <h3 className="feature-title">Environmental Monitoring</h3>
               <p className="feature-description">
-                Get localized weather forecasts and farming recommendations based on conditions.
+                Monitor and analyze environmental conditions for optimal crop growth.
               </p>
-              <button className="feature-btn">
-                Start Chat
+              <div className="feature-btn">
+                Monitor Now
                 <span className="btn-icon">→</span>
-              </button>
+              </div>
             </div>
             
-            <div className="feature-card" onClick={() => handleFeatureClick('finance')}>
+            <div className="feature-card" onClick={() => navigate('/financial-assistance')}>
               <div className="feature-icon">💰</div>
-              <h3 className="feature-title">Financial Guide</h3>
+              <h3 className="feature-title">Financial Assistance</h3>
               <p className="feature-description">
-                Calculate crop ROI, manage expenses, and optimize your farming investments.
+                Explore government schemes and calculate your potential benefits.
               </p>
               <button className="feature-btn">
-                Start Chat
+                Explore Now
                 <span className="btn-icon">→</span>
               </button>
             </div>
+            
+            
           </div>
         </div>
       </section>
@@ -346,10 +345,13 @@ const HomePage = () => {
             <div className="footer-section">
               <h4>Services</h4>
               <ul className="footer-links">
-                <li><a href="/chat/soil">Soil Analysis</a></li>
+                <li><a href="/soil-analysis">Soil Analysis</a></li>
+                <li><a href="/chat/soil">Soil Chat</a></li>
                 <li><a href="/chat/pest">Pest Detection</a></li>
                 <li><a href="/chat/weather">Weather Forecast</a></li>
                 <li><a href="/chat/finance">Financial Planning</a></li>
+                <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                <li><a href="/disease-pest-dashboard">Disease Dashboard</a></li>
               </ul>
             </div>
             

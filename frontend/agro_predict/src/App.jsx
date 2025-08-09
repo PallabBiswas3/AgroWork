@@ -2,10 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
-import ChatPage from "./pages/ChatPage";
 import RegisterPage from "./pages/RegisterPage";
-import CropRecommendation from "./pages/CropRecommendation";
 import DiseasePestDashboard from "./pages/DiseasePestDashboard";
+import Financial from "./pages/Financial";
+import SoilAnalysis from "./pages/SoilAnalysis";
+import EnvironmentalMonitoring from "./pages/EnvironmentalMonitoring";
+import CropRecommendation from "./pages/CropRecommendation";
 import "./App.css";
 
 // Authentication Context
@@ -95,11 +97,6 @@ function App() {
                 <HomePage />
               </ProtectedRoute>
             } />
-            <Route path="/chat/:category" element={
-              <ProtectedRoute>
-                <ChatPage />
-              </ProtectedRoute>
-            } />
             <Route path="/crop-recommendation" element={
               <ProtectedRoute>
                 <CropRecommendation />
@@ -108,6 +105,21 @@ function App() {
             <Route path="/disease-pest-dashboard" element={
               <ProtectedRoute>
                 <DiseasePestDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/soil-analysis" element={
+              <ProtectedRoute>
+                <SoilAnalysis />
+              </ProtectedRoute>
+            } />
+            <Route path="/financial-assistance" element={
+              <ProtectedRoute>
+                <Financial />
+              </ProtectedRoute>
+            } />
+            <Route path="/environmental-monitoring" element={
+              <ProtectedRoute>
+                <EnvironmentalMonitoring />
               </ProtectedRoute>
             } />
             

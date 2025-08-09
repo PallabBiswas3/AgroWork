@@ -1,518 +1,634 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CROP_DATABASE, INDIAN_STATES, INDIAN_SEASONS, classifyAgroClimaticZone } from '../data/indiaCrops';
 import './CropRecommendation.css';
 
-const CROP_DATABASE = {
-    rice: {
-        name: "Rice",
-        description: "Primary cereal crop, requires high water availability",
-        optimal_conditions: "High rainfall, warm temperature, acidic to neutral soil",
-        season: "Kharif, Rabi",
-        tips: "Ensure proper water management and soil preparation"
-    },
-    maize: {
-        name: "Maize (Corn)",
-        description: "Versatile cereal crop, good for fodder and food",
-        optimal_conditions: "Moderate rainfall, warm temperature, well-drained soil",
-        season: "Kharif, Rabi",
-        tips: "Plant after last frost, ensure good drainage"
-    },
-    cotton: {
-        name: "Cotton",
-        description: "Important cash crop for textile industry",
-        optimal_conditions: "Moderate rainfall, high temperature, alkaline soil",
-        season: "Kharif",
-        tips: "Requires warm weather and pest management"
-    },
-    wheat: {
-        name: "Wheat",
-        description: "Major food grain crop, winter staple",
-        optimal_conditions: "Low to moderate rainfall, cool temperature",
-        season: "Rabi",
-        tips: "Plant in winter, harvest before summer heat"
-    },
-    sugarcane: {
-        name: "Sugarcane",
-        description: "Cash crop for sugar production",
-        optimal_conditions: "High rainfall, high temperature, rich soil",
-        season: "Whole Year",
-        tips: "Requires abundant water and fertile soil"
-    },
-    groundnut: {
-        name: "Groundnut (Peanut)",
-        description: "Oilseed and protein rich legume",
-        optimal_conditions: "Moderate rainfall, warm temperature, sandy soil",
-        season: "Kharif, Rabi",
-        tips: "Avoid waterlogged conditions, ensure calcium availability"
-    },
-    jute: {
-        name: "Jute",
-        description: "Fiber crop for making sacks and ropes",
-        optimal_conditions: "High rainfall, high humidity, alluvial soil",
-        season: "Kharif",
-        tips: "Requires warm, humid climate and fertile soil"
-    },
-    lentil: {
-        name: "Lentil",
-        description: "Protein-rich pulse crop",
-        optimal_conditions: "Low rainfall, cool temperature, alkaline soil",
-        season: "Rabi",
-        tips: "Drought tolerant, good for crop rotation"
-    },
-    chickpea: {
-        name: "Chickpea",
-        description: "Important pulse crop, high protein",
-        optimal_conditions: "Low rainfall, cool temperature, well-drained soil",
-        season: "Rabi",
-        tips: "Avoid excess moisture, plant in winter"
-    },
-    coconut: {
-        name: "Coconut",
-        description: "Tropical tree crop, multiple uses",
-        optimal_conditions: "High rainfall, high humidity, coastal areas",
-        season: "Whole Year",
-        tips: "Requires coastal climate and regular watering"
-    },
-    coffee: {
-        name: "Coffee",
-        description: "Cash crop, beverage plant",
-        optimal_conditions: "High rainfall, moderate temperature, acidic soil",
-        season: "Whole Year",
-        tips: "Shade-loving crop, requires processing facilities"
-    },
-    papaya: {
-        name: "Papaya",
-        description: "Fruit crop, year-round production",
-        optimal_conditions: "Moderate rainfall, warm temperature, well-drained soil",
-        season: "Whole Year",
-        tips: "Fast growing, requires protection from strong winds"
-    },
-    mothbeans: {
-        name: "Moth Beans",
-        description: "Drought-resistant legume crop",
-        optimal_conditions: "Low rainfall, high temperature, sandy soil",
-        season: "Kharif",
-        tips: "Extremely drought tolerant, good for arid regions"
-    },
-    pigeonpeas: {
-        name: "Pigeon Peas",
-        description: "Perennial legume, soil improvement",
-        optimal_conditions: "Moderate rainfall, warm temperature",
-        season: "Kharif",
-        tips: "Good for intercropping, improves soil fertility"
-    },
-    mungbean: {
-        name: "Mung Bean",
-        description: "Short duration pulse crop",
-        optimal_conditions: "Moderate rainfall, warm temperature",
-        season: "Kharif, Summer",
-        tips: "Fast growing, good for crop rotation"
-    }
-};
+const CropRecommendation = () => {
+    const navigate = useNavigate();
 
-const DEFAULT_VALUES = {
-    N: 50,
-    P: 53,
-    K: 48,
-    temperature: 26,
-    humidity: 71,
-    ph: 6.5,
-    rainfall: 103
-};
+    const [formData, setFormData] = useState({
+        // Soil nutrients
+        nitrogen: 50,
+        phosphorus: 40,
+        potassium: 40,
+        ph: 6.5,
 
-const CLIMATE_ZONES = {
-    tropical: { temp_min: 25, temp_max: 35, rainfall_min: 200 },
-    subtropical: { temp_min: 15, temp_max: 30, rainfall_min: 50 },
-    temperate: { temp_min: 10, temp_max: 25, rainfall_min: 30 },
-    arid: { temp_min: 20, temp_max: 40, rainfall_max: 100 }
-};
+        // Environmental conditions
+        temperature: 28,
+        humidity: 70,
+        rainfall: 120,
 
-function getClimateZone(temperature, rainfall) {
-  if (temperature >= CLIMATE_ZONES.tropical.temp_min && temperature <= CLIMATE_ZONES.tropical.temp_max && rainfall >= CLIMATE_ZONES.tropical.rainfall_min) {
-    return { zone: 'Tropical', description: 'High temperature, high rainfall - Ideal for rice, sugarcane, coconut' };
-  } else if (temperature >= CLIMATE_ZONES.arid.temp_min && temperature <= CLIMATE_ZONES.arid.temp_max && rainfall <= (CLIMATE_ZONES.arid.rainfall_max || 100)) {
-    return { zone: 'Arid', description: 'Hot and dry - Suitable for drought-resistant crops like moth beans' };
-  } else if (temperature >= CLIMATE_ZONES.temperate.temp_min && temperature <= CLIMATE_ZONES.temperate.temp_max) {
-    return { zone: 'Temperate', description: 'Cool temperature - Ideal for wheat, chickpea, lentil' };
-  }
-  return { zone: 'Subtropical', description: 'Moderate temperature - Good for diverse crops like maize, cotton' };
-}
+        // Location and timing
+        season: 'Kharif',
+        state: 'KA',
+        district: ''
+    });
 
-function generateRecommendations(formData) {
-  const { N, P, K, temperature, humidity, ph, rainfall, season } = formData;
-  const crops = [];
-  if (N || P || K || temperature || humidity || ph || rainfall) {
-    if (rainfall > 150 && ph < 6.5) {
-      crops.push({ crop: 'rice', confidence: 95, reason: 'High rainfall + acidic soil' });
-      crops.push({ crop: 'coconut', confidence: 90, reason: 'High rainfall + acidic soil' });
-    }
-    if (rainfall < 100 && ph > 7.5) {
-      crops.push({ crop: 'lentil', confidence: 92, reason: 'Low rainfall + alkaline soil' });
-      crops.push({ crop: 'mothbeans', confidence: 88, reason: 'Low rainfall + alkaline soil' });
-      crops.push({ crop: 'chickpea', confidence: 85, reason: 'Low rainfall + alkaline soil' });
-    }
-    if (N > 70 && P > 50 && K > 50) {
-      crops.push({ crop: 'jute', confidence: 89, reason: 'High NPK + moderate conditions' });
-      crops.push({ crop: 'papaya', confidence: 86, reason: 'High NPK + moderate conditions' });
-      crops.push({ crop: 'coffee', confidence: 83, reason: 'High NPK + moderate conditions' });
-    }
-    if (season === 'Rabi') {
-      crops.push({ crop: 'wheat', confidence: 87, reason: 'Rabi season crop' });
-      crops.push({ crop: 'chickpea', confidence: 84, reason: 'Rabi season crop' });
-      crops.push({ crop: 'lentil', confidence: 82, reason: 'Rabi season crop' });
-    }
-    if (season === 'Kharif') {
-      crops.push({ crop: 'rice', confidence: 90, reason: 'Kharif season crop' });
-      crops.push({ crop: 'cotton', confidence: 86, reason: 'Kharif season crop' });
-      crops.push({ crop: 'maize', confidence: 84, reason: 'Kharif season crop' });
-    }
-    if (humidity > 80) {
-      crops.push({ crop: 'jute', confidence: 85, reason: 'High humidity' });
-    }
-    if (temperature > 30) {
-      crops.push({ crop: 'cotton', confidence: 82, reason: 'High temperature' });
-      crops.push({ crop: 'mothbeans', confidence: 80, reason: 'High temperature' });
-    }
-    if (temperature < 20) {
-      crops.push({ crop: 'wheat', confidence: 88, reason: 'Cool temperature' });
-    }
-    if (crops.length < 3) {
-      crops.push({ crop: 'maize', confidence: 80, reason: 'Balanced conditions' });
-      crops.push({ crop: 'cotton', confidence: 78, reason: 'Balanced conditions' });
-      crops.push({ crop: 'sugarcane', confidence: 75, reason: 'Balanced conditions' });
-      crops.push({ crop: 'groundnut', confidence: 73, reason: 'Balanced conditions' });
-      crops.push({ crop: 'rice', confidence: 70, reason: 'Common staple crop' });
-    }
-  }
-  const uniqueCrops = [];
-  const seen = new Set();
-  crops.forEach(item => {
-    if (!seen.has(item.crop) && CROP_DATABASE[item.crop]) {
-      seen.add(item.crop);
-      uniqueCrops.push(item);
-    }
-  });
-  uniqueCrops.sort((a, b) => b.confidence - a.confidence);
-  return uniqueCrops.slice(0, 5).map(item => {
-    const cropData = CROP_DATABASE[item.crop];
-    return {
-      name: cropData.name,
-      description: cropData.description,
-      season: cropData.season,
-      tips: cropData.tips,
-      confidence: item.confidence,
-      confidenceLevel: item.confidence >= 85 ? 'high' : item.confidence >= 70 ? 'medium' : 'low',
-      reason: item.reason
+    const [recommendations, setRecommendations] = useState([]);
+    const [climateZone, setClimateZone] = useState('');
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
+
+    // Handle form input changes
+    const handleInputChange = (e) => {
+        const { name, value, type } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'number' ? parseFloat(value) || 0 : value
+        }));
     };
-  });
-}
 
-function CropRecommendation() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({ ...DEFAULT_VALUES, season: 'Kharif', state: 'Maharashtra' });
-  const [recommendations, setRecommendations] = useState(() => generateRecommendations({ ...DEFAULT_VALUES, season: 'Kharif', state: 'Maharashtra' }));
-  const [showExport, setShowExport] = useState(false);
-  const exportTextRef = useRef();
+    // Calculate crop suitability score
+    const calculateCropScore = (cropKey, cropData) => {
+        let score = 0;
+        const maxScore = 100;
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => {
-      const updated = { ...prev, [name]: name === 'ph' || name === 'temperature' || name === 'humidity' || name === 'rainfall' ? parseFloat(value) : name === 'N' || name === 'P' || name === 'K' ? parseInt(value) : value };
-      setRecommendations(generateRecommendations(updated));
-      return updated;
-    });
-  };
+        // State suitability (25 points)
+        if (cropData.states.includes(formData.state)) {
+            score += 25;
+        }
 
-  const handleUseDefaults = () => {
-    setFormData({ ...DEFAULT_VALUES, season: 'Kharif', state: 'Maharashtra' });
-    setRecommendations(generateRecommendations({ ...DEFAULT_VALUES, season: 'Kharif', state: 'Maharashtra' }));
-  };
+        // Season suitability (25 points)
+        if (cropData.seasons.includes(formData.season)) {
+            score += 25;
+        }
 
-  const handleReset = () => {
-    setFormData({ N: 50, P: 53, K: 48, temperature: 26, humidity: 71, ph: 6.5, rainfall: 103, season: '', state: '' });
-    setRecommendations([]);
-  };
+        // Climate zone suitability (25 points)
+        const zone = classifyAgroClimaticZone(formData.temperature, formData.rainfall);
+        if (cropData.zones.includes(zone)) {
+            score += 25;
+        }
 
-  const handleExport = () => setShowExport(true);
-  const handleCloseExport = () => setShowExport(false);
+        // NPK suitability (25 points)
+        const npkScore = calculateNPKScore(cropData);
+        score += npkScore;
 
-  const handleCopy = async () => {
-    if (exportTextRef.current) {
-      await navigator.clipboard.writeText(exportTextRef.current.value);
-    }
-  };
+        return Math.min(score, maxScore) / 100;
+    };
 
-  const handleDownload = () => {
-    if (exportTextRef.current) {
-      const blob = new Blob([exportTextRef.current.value], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `crop-recommendations-${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      setShowExport(false);
-    }
-  };
+    // Calculate NPK compatibility score
+    const calculateNPKScore = (cropData) => {
+        let npkScore = 0;
+        const { N, P, K } = cropData.npk_requirements;
 
-  const exportText = () => {
-    const timestamp = new Date().toLocaleString();
-    let text = `SMART CROP RECOMMENDATION REPORT\n`;
-    text += `Generated on: ${timestamp}\n`;
-    text += `${'='.repeat(50)}\n\n`;
-    text += `INPUT PARAMETERS:\n`;
-    text += `- Nitrogen (N): ${formData.N} ppm\n`;
-    text += `- Phosphorus (P): ${formData.P} ppm\n`;
-    text += `- Potassium (K): ${formData.K} ppm\n`;
-    text += `- Temperature: ${formData.temperature}°C\n`;
-    text += `- Humidity: ${formData.humidity}%\n`;
-    text += `- Soil pH: ${formData.ph}\n`;
-    text += `- Rainfall: ${formData.rainfall} mm\n`;
-    text += `- Season: ${formData.season || 'Not specified'}\n`;
-    text += `- State: ${formData.state || 'Not specified'}\n\n`;
-    text += `TOP CROP RECOMMENDATIONS:\n`;
-    text += `${'-'.repeat(30)}\n`;
-    recommendations.forEach((rec, index) => {
-      text += `${index + 1}. ${rec.name} (${rec.confidence}% confidence)\n`;
-      text += `   Description: ${rec.description}\n`;
-      text += `   Season: ${rec.season}\n`;
-      text += `   Tips: ${rec.tips}\n\n`;
-    });
-    text += `\nDISCLAIMER:\n`;
-    text += `These recommendations are based on agricultural analysis and should be\n`;
-    text += `considered alongside local conditions, expert advice, and market factors.\n`;
-    return text;
-  };
+        // Check if current NPK values are within optimal range
+        const nScore = isInRange(formData.nitrogen, N[0], N[1]) ? 8.33 :
+            getProximityScore(formData.nitrogen, N[0], N[1]) * 8.33;
+        const pScore = isInRange(formData.phosphorus, P[0], P[1]) ? 8.33 :
+            getProximityScore(formData.phosphorus, P[0], P[1]) * 8.33;
+        const kScore = isInRange(formData.potassium, K[0], K[1]) ? 8.34 :
+            getProximityScore(formData.potassium, K[0], K[1]) * 8.34;
 
-  const { zone, description } = getClimateZone(formData.temperature, formData.rainfall);
+        return nScore + pScore + kScore;
+    };
 
-  return (
-    <div className="container crop-recommendation-container">
-      <header className="header">
-        <div className="header-content">
-          <h1>🌾 Smart Crop Recommendation System</h1>
-          <p>Make data-driven planting decisions with advanced agricultural insights</p>
-          <button className="btn btn--outline btn--sm" onClick={() => navigate('/home')} style={{marginTop: '1rem'}}>
-            ← Back to Home
-          </button>
-        </div>
-      </header>
-      <div className="main-content">
-        <div className="input-section">
-          <div className="card">
-            <div className="card__header">
-              <h2>Agricultural Parameters</h2>
-              <div className="form-actions">
-                <button type="button" className="btn btn--secondary btn--sm" onClick={handleUseDefaults}>Use Default Values</button>
-                <button type="button" className="btn btn--outline btn--sm" onClick={handleReset}>Reset Form</button>
-              </div>
-            </div>
-            <div className="card__body">
-              <form id="cropForm" onSubmit={e => e.preventDefault()}>
-                {/* Soil Nutrients Section */}
-                <div className="form-section">
-                  <h3>Soil Nutrients</h3>
-                  <div className="nutrient-grid">
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="nitrogen">Nitrogen (N)</label>
-                      <input type="range" id="nitrogen" name="N" min="0" max="200" value={formData.N} className="slider" onChange={handleInputChange} />
-                      <div className="slider-value"><span>{formData.N}</span> ppm</div>
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="phosphorus">Phosphorus (P)</label>
-                      <input type="range" id="phosphorus" name="P" min="0" max="200" value={formData.P} className="slider" onChange={handleInputChange} />
-                      <div className="slider-value"><span>{formData.P}</span> ppm</div>
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="potassium">Potassium (K)</label>
-                      <input type="range" id="potassium" name="K" min="0" max="200" value={formData.K} className="slider" onChange={handleInputChange} />
-                      <div className="slider-value"><span>{formData.K}</span> ppm</div>
-                    </div>
-                  </div>
+    // Check if value is in range
+    const isInRange = (value, min, max) => value >= min && value <= max;
+
+    // Get proximity score (how close to optimal range)
+    const getProximityScore = (value, min, max) => {
+        const optimalMid = (min + max) / 2;
+        const maxDeviation = Math.max(Math.abs(min - optimalMid), Math.abs(max - optimalMid)) * 2;
+        const deviation = Math.abs(value - optimalMid);
+        return Math.max(0, 1 - (deviation / maxDeviation));
+    };
+
+    // Generate crop recommendations
+    const generateRecommendations = () => {
+        setIsAnalyzing(true);
+
+        // Simulate analysis time for better UX
+        setTimeout(() => {
+            const scored = Object.entries(CROP_DATABASE).map(([key, data]) => ({
+                crop: key,
+                data: data,
+                score: calculateCropScore(key, data)
+            }));
+
+            // Sort by score and take top recommendations
+            const sorted = scored.sort((a, b) => b.score - a.score).slice(0, 8);
+            setRecommendations(sorted);
+
+            // Update climate zone
+            const zone = classifyAgroClimaticZone(formData.temperature, formData.rainfall);
+            setClimateZone(zone);
+
+            setIsAnalyzing(false);
+        }, 1500);
+    };
+
+    // Use default values for quick testing
+    const useDefaultValues = () => {
+        setFormData({
+            nitrogen: 60,
+            phosphorus: 45,
+            potassium: 50,
+            ph: 6.8,
+            temperature: 28,
+            humidity: 75,
+            rainfall: 120,
+            season: 'Kharif',
+            state: 'KA',
+            district: 'Bangalore Rural'
+        });
+    };
+
+    // Reset form
+    const resetForm = () => {
+        setFormData({
+            nitrogen: 0,
+            phosphorus: 0,
+            potassium: 0,
+            ph: 7.0,
+            temperature: 0,
+            humidity: 0,
+            rainfall: 0,
+            season: 'Kharif',
+            state: 'KA',
+            district: ''
+        });
+        setRecommendations([]);
+        setClimateZone('');
+    };
+
+    // Handle form submission
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        generateRecommendations();
+    };
+
+    // Export functionality
+    const generateExportText = () => {
+        return `🇮🇳 SMART CROP RECOMMENDATION REPORT - INDIA\n\n` +
+            `📍 LOCATION DETAILS:\n` +
+            `State: ${INDIAN_STATES[formData.state] || formData.state}\n` +
+            `District: ${formData.district || 'Not specified'}\n` +
+            `Season: ${formData.season} (${INDIAN_SEASONS[formData.season]?.period || ''})\n` +
+            `Agro-climatic Zone: ${climateZone}\n\n` +
+            `🧪 SOIL ANALYSIS:\n` +
+            `- Nitrogen (N): ${formData.nitrogen} ppm\n` +
+            `- Phosphorus (P): ${formData.phosphorus} ppm\n` +
+            `- Potassium (K): ${formData.potassium} ppm\n` +
+            `- Soil pH: ${formData.ph}\n\n` +
+            `🌡️ ENVIRONMENTAL CONDITIONS:\n` +
+            `- Temperature: ${formData.temperature}°C\n` +
+            `- Humidity: ${formData.humidity}%\n` +
+            `- Rainfall: ${formData.rainfall} mm/month\n\n` +
+            `🌾 TOP CROP RECOMMENDATIONS:\n` +
+            recommendations.slice(0, 5).map((rec, index) =>
+                `${index + 1}. ${rec.data.name}\n` +
+                `   Suitability: ${(rec.score * 100).toFixed(1)}%\n` +
+                `   Duration: ${rec.data.duration}\n` +
+                `   Expected Yield: ${rec.data.yield}\n` +
+                `   Tips: ${rec.data.tips}\n`
+            ).join('\n') +
+            `\n📊 Generated on: ${new Date().toLocaleDateString('en-IN')}\n` +
+            `💡 This report is generated based on scientific crop suitability analysis for Indian agriculture.`;
+    };
+
+    const copyResults = () => {
+        navigator.clipboard.writeText(generateExportText());
+        alert('Results copied to clipboard! 📋');
+    };
+
+    const downloadResults = () => {
+        const element = document.createElement('a');
+        const file = new Blob([generateExportText()], { type: 'text/plain' });
+        element.href = URL.createObjectURL(file);
+        element.download = `crop-recommendation-${formData.state}-${Date.now()}.txt`;
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    };
+
+    // Auto-generate recommendations when form data changes
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (formData.nitrogen > 0 && formData.phosphorus > 0 && formData.potassium > 0 &&
+                formData.temperature > 0 && formData.rainfall > 0) {
+                generateRecommendations();
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [formData]);
+
+    return (
+        <div className="crop-recommendation-india">
+            <div className="container">
+                {/* Header */}
+                <div className="page-header">
+                    <h1>🇮🇳 भारतीय कृषि सलाहकार</h1>
+                    <h2>Smart Crop Recommendation System for India</h2>
+                    <p>राज्य, मौसम और मिट्टी के आधार पर सबसे उपयुक्त फसलों की सिफारिश प्राप्त करें</p>
+                    <p>Get scientifically-backed crop recommendations based on your state, season & soil conditions</p>
                 </div>
-                {/* Environmental Conditions Section */}
-                <div className="form-section">
-                  <h3>Environmental Conditions</h3>
-                  <div className="environmental-grid">
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="temperature">Temperature</label>
-                      <input type="number" id="temperature" name="temperature" min="0" max="50" value={formData.temperature} className="form-control" onChange={handleInputChange} />
-                      <small>°C</small>
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="humidity">Humidity</label>
-                      <input type="number" id="humidity" name="humidity" min="0" max="100" value={formData.humidity} className="form-control" onChange={handleInputChange} />
-                      <small>%</small>
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="ph">Soil pH</label>
-                      <input type="number" id="ph" name="ph" min="3" max="10" step="0.1" value={formData.ph} className="form-control" onChange={handleInputChange} />
-                      <small>pH scale</small>
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="rainfall">Rainfall</label>
-                      <input type="number" id="rainfall" name="rainfall" min="0" max="500" value={formData.rainfall} className="form-control" onChange={handleInputChange} />
-                      <small>mm</small>
-                    </div>
-                  </div>
-                </div>
-                {/* Location and Timing Section */}
-                <div className="form-section">
-                  <h3>Location & Timing</h3>
-                  <div className="location-grid">
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="season">Season</label>
-                      <select id="season" name="season" className="form-control" value={formData.season} onChange={handleInputChange}>
-                        <option value="">Select Season</option>
-                        <option value="Kharif">Kharif (Monsoon)</option>
-                        <option value="Rabi">Rabi (Winter)</option>
-                        <option value="Whole Year">Whole Year</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="state">State</label>
-                      <select id="state" name="state" className="form-control" value={formData.state} onChange={handleInputChange}>
-                        <option value="">Select State</option>
-                        <option value="Andhra Pradesh">Andhra Pradesh</option>
-                        <option value="Assam">Assam</option>
-                        <option value="Bihar">Bihar</option>
-                        <option value="Chhattisgarh">Chhattisgarh</option>
-                        <option value="Goa">Goa</option>
-                        <option value="Gujarat">Gujarat</option>
-                        <option value="Haryana">Haryana</option>
-                        <option value="Himachal Pradesh">Himachal Pradesh</option>
-                        <option value="Jharkhand">Jharkhand</option>
-                        <option value="Karnataka">Karnataka</option>
-                        <option value="Kerala">Kerala</option>
-                        <option value="Madhya Pradesh">Madhya Pradesh</option>
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Manipur">Manipur</option>
-                        <option value="Meghalaya">Meghalaya</option>
-                        <option value="Mizoram">Mizoram</option>
-                        <option value="Nagaland">Nagaland</option>
-                        <option value="Odisha">Odisha</option>
-                        <option value="Punjab">Punjab</option>
-                        <option value="Rajasthan">Rajasthan</option>
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        <option value="Tripura">Tripura</option>
-                        <option value="Uttar Pradesh">Uttar Pradesh</option>
-                        <option value="Uttarakhand">Uttarakhand</option>
-                        <option value="West Bengal">West Bengal</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-          {/* Climate Zone Indicator */}
-          <div className="climate-zone card">
-            <div className="card__body">
-              <h3>🌡️ Climate Zone</h3>
-              <div className="climate-info">
-                <span className="climate-badge">{zone}</span>
-                <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 4 }}>{description}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Results Section */}
-        <div className="results-section">
-          {/* Input Summary */}
-          <div className="card input-summary">
-            <div className="card__header">
-              <h3>📊 Input Summary</h3>
-            </div>
-            <div className="card__body">
-              <div className="summary-grid">
-                <div className="summary-item"><div className="summary-label">Nitrogen</div><div className="summary-value">{formData.N} ppm</div></div>
-                <div className="summary-item"><div className="summary-label">Phosphorus</div><div className="summary-value">{formData.P} ppm</div></div>
-                <div className="summary-item"><div className="summary-label">Potassium</div><div className="summary-value">{formData.K} ppm</div></div>
-                <div className="summary-item"><div className="summary-label">Temperature</div><div className="summary-value">{formData.temperature}°C</div></div>
-                <div className="summary-item"><div className="summary-label">Humidity</div><div className="summary-value">{formData.humidity}%</div></div>
-                <div className="summary-item"><div className="summary-label">pH</div><div className="summary-value">{formData.ph}</div></div>
-                <div className="summary-item"><div className="summary-label">Rainfall</div><div className="summary-value">{formData.rainfall} mm</div></div>
-                <div className="summary-item"><div className="summary-label">Season</div><div className="summary-value">{formData.season || 'Not set'}</div></div>
-              </div>
-            </div>
-          </div>
-          {/* Crop Recommendations */}
-          <div className="card recommendations">
-            <div className="card__header">
-              <h3>🌱 Top Crop Recommendations</h3>
-              <button type="button" className="btn btn--outline btn--sm" onClick={handleExport}>Export Results</button>
-            </div>
-            <div className="card__body">
-              <div className="recommendations-grid">
-                {recommendations.length === 0 ? (
-                  <div className="empty-state"><div>Enter your agricultural parameters to get crop recommendations</div></div>
-                ) : (
-                  recommendations.map((rec, index) => (
-                    <div className="recommendation-item" key={rec.name} style={{ animationDelay: `${index * 0.1}s` }}>
-                      <div className="recommendation-rank">{index + 1}</div>
-                      <div className="recommendation-content">
-                        <div className="recommendation-name">{rec.name}</div>
-                        <div className="recommendation-description">{rec.description}</div>
-                        <div className="recommendation-details">
-                          <div className="recommendation-season"><strong>Season:</strong> {rec.season}</div>
-                          <div className="recommendation-tips">💡 {rec.tips}</div>
+
+                <div className="main-grid">
+                    {/* Input Section */}
+                    <div className="input-section">
+                        <div className="card enhanced-card">
+                            <div className="card__header">
+                                <h3>📋 कृषि मापदंड | Agricultural Parameters</h3>
+                                <div className="form-actions">
+                                    <button
+                                        type="button"
+                                        className="btn btn--secondary btn--sm"
+                                        onClick={useDefaultValues}
+                                    >
+                                        🔄 Default Values
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn--outline btn--sm"
+                                        onClick={resetForm}
+                                    >
+                                        🗑️ Reset
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="card__body">
+                                <form onSubmit={handleSubmit} className="india-form">
+                                    {/* Location Section */}
+                                    <div className="form-section location-section">
+                                        <h4>📍 स्थान और मौसम | Location & Season</h4>
+                                        <div className="form-grid location-grid">
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    🏛️ राज्य | State
+                                                </label>
+                                                <select
+                                                    name="state"
+                                                    value={formData.state}
+                                                    onChange={handleInputChange}
+                                                    className="form-control enhanced-select"
+                                                >
+                                                    {Object.entries(INDIAN_STATES).map(([code, name]) => (
+                                                        <option key={code} value={code}>{name} ({code})</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    🌾 मौसम | Season
+                                                </label>
+                                                <select
+                                                    name="season"
+                                                    value={formData.season}
+                                                    onChange={handleInputChange}
+                                                    className="form-control enhanced-select"
+                                                >
+                                                    {Object.entries(INDIAN_SEASONS).map(([key, season]) => (
+                                                        <option key={key} value={key}>{season.name}</option>
+                                                    ))}
+                                                </select>
+                                                <small className="form-hint">
+                                                    {INDIAN_SEASONS[formData.season]?.description}
+                                                </small>
+                                            </div>
+
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    🏘️ जिला | District
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="district"
+                                                    value={formData.district}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Enter district name"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Soil Nutrients */}
+                                    <div className="form-section nutrients-section">
+                                        <h4>🧪 मिट्टी के पोषक तत्व | Soil Nutrients (ppm)</h4>
+                                        <div className="form-grid nutrients-grid">
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    <span className="nutrient-icon n-icon">N</span>
+                                                    Nitrogen | नाइट्रोजन
+                                                    <span className="slider-value">{formData.nitrogen} ppm</span>
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    name="nitrogen"
+                                                    min="0"
+                                                    max="200"
+                                                    value={formData.nitrogen}
+                                                    onChange={handleInputChange}
+                                                    className="slider nitrogen-slider"
+                                                />
+                                                <div className="slider-labels">
+                                                    <span>0</span>
+                                                    <span>200</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    <span className="nutrient-icon p-icon">P</span>
+                                                    Phosphorus | फॉस्फोरस
+                                                    <span className="slider-value">{formData.phosphorus} ppm</span>
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    name="phosphorus"
+                                                    min="0"
+                                                    max="100"
+                                                    value={formData.phosphorus}
+                                                    onChange={handleInputChange}
+                                                    className="slider phosphorus-slider"
+                                                />
+                                                <div className="slider-labels">
+                                                    <span>0</span>
+                                                    <span>100</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    <span className="nutrient-icon k-icon">K</span>
+                                                    Potassium | पोटेशियम
+                                                    <span className="slider-value">{formData.potassium} ppm</span>
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    name="potassium"
+                                                    min="0"
+                                                    max="200"
+                                                    value={formData.potassium}
+                                                    onChange={handleInputChange}
+                                                    className="slider potassium-slider"
+                                                />
+                                                <div className="slider-labels">
+                                                    <span>0</span>
+                                                    <span>200</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    🧪 Soil pH | मिट्टी का pH
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="ph"
+                                                    min="3"
+                                                    max="10"
+                                                    step="0.1"
+                                                    value={formData.ph}
+                                                    onChange={handleInputChange}
+                                                    className="form-control"
+                                                    placeholder="6.5"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Environmental Conditions */}
+                                    <div className="form-section environment-section">
+                                        <h4>🌡️ पर्यावरणीय स्थितियां | Environmental Conditions</h4>
+                                        <div className="form-grid environment-grid">
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    🌡️ Temperature | तापमान (°C)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="temperature"
+                                                    min="0"
+                                                    max="50"
+                                                    value={formData.temperature}
+                                                    onChange={handleInputChange}
+                                                    className="form-control"
+                                                />
+                                            </div>
+
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    💧 Humidity | आर्द्रता (%)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="humidity"
+                                                    min="0"
+                                                    max="100"
+                                                    value={formData.humidity}
+                                                    onChange={handleInputChange}
+                                                    className="form-control"
+                                                />
+                                            </div>
+
+                                            <div className="form-group enhanced">
+                                                <label className="form-label">
+                                                    🌧️ Rainfall | वर्षा (mm/month)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="rainfall"
+                                                    min="0"
+                                                    max="500"
+                                                    value={formData.rainfall}
+                                                    onChange={handleInputChange}
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-actions submit-section">
+                                        <button
+                                            type="submit"
+                                            className="btn btn--primary btn--large analyze-btn"
+                                            disabled={isAnalyzing}
+                                        >
+                                            {isAnalyzing ? (
+                                                <>
+                                                    <div className="spinner"></div>
+                                                    विश्लेषण हो रहा है... | Analyzing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    🎯 फसल की सिफारिश प्राप्त करें | Get Crop Recommendations
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                      </div>
-                      <div className="confidence-indicator">
-                        <div className="confidence-bar">
-                          <div className={`confidence-fill ${rec.confidenceLevel}`} style={{ width: `${rec.confidence}%` }}></div>
+
+                        {/* Climate Zone Card */}
+                        <div className="climate-zone-card card enhanced-card">
+                            <div className="card__body">
+                                <h4>🌍 कृषि जलवायु क्षेत्र | Agro-climatic Zone</h4>
+                                <div className="climate-zone-content">
+                                    <div className="climate-zone-icon">
+                                        {climateZone === 'Humid' && '🌴'}
+                                        {climateZone === 'Sub-Humid' && '🌳'}
+                                        {climateZone === 'Semi-Arid' && '🌾'}
+                                        {climateZone === 'Arid' && '🏜️'}
+                                        {!climateZone && '🌍'}
+                                    </div>
+                                    <div className="climate-zone-info">
+                                        <h5>{climateZone || 'Zone not determined'}</h5>
+                                        <p>
+                                            {climateZone
+                                                ? `आपका क्षेत्र ${climateZone} जलवायु क्षेत्र में वर्गीकृत है।`
+                                                : 'पूर्ण जानकारी दर्ज करें।'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="confidence-text">{rec.confidence}%</div>
-                      </div>
                     </div>
-                  ))
+
+                    {/* Results Section */}
+                    <div className="results-section">
+                        <div className="card enhanced-card results-card">
+                            <div className="card__header">
+                                <h3>🏆 फसल सिफारिशें | Crop Recommendations</h3>
+                                {recommendations.length > 0 && (
+                                    <button
+                                        className="btn btn--outline btn--sm"
+                                        onClick={() => setShowExportModal(true)}
+                                    >
+                                        📤 Export Results
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="card__body">
+                                {recommendations.length > 0 ? (
+                                    <div className="recommendations-container">
+                                        {/* Summary */}
+                                        <div className="recommendation-summary">
+                                            <div className="summary-card">
+                                                <h4>📊 विश्लेषण सारांश | Analysis Summary</h4>
+                                                <div className="summary-stats">
+                                                    <div className="stat-item">
+                                                        <span className="stat-label">राज्य | State:</span>
+                                                        <span className="stat-value">{INDIAN_STATES[formData.state]}</span>
+                                                    </div>
+                                                    <div className="stat-item">
+                                                        <span className="stat-label">मौसम | Season:</span>
+                                                        <span className="stat-value">{formData.season}</span>
+                                                    </div>
+                                                    <div className="stat-item">
+                                                        <span className="stat-label">जलवायु क्षेत्र:</span>
+                                                        <span className="stat-value">{climateZone}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Recommendations List */}
+                                        <div className="recommendations-list">
+                                            {recommendations.map((rec, index) => (
+                                                <div
+                                                    key={rec.crop}
+                                                    className={`recommendation-card stagger-item ${rec.score >= 0.8 ? 'high-match' :
+                                                            rec.score >= 0.6 ? 'medium-match' : 'low-match'
+                                                        }`}
+                                                >
+                                                    <div className="rec-header">
+                                                        <div className="rec-rank">{index + 1}</div>
+                                                        <div className="rec-title">
+                                                            <h4>{rec.data.name}</h4>
+                                                            <div className="rec-score">
+                                                                <div
+                                                                    className="score-bar"
+                                                                    style={{ width: `${rec.score * 100}%` }}
+                                                                ></div>
+                                                                <span className="score-text">
+                                                                    {(rec.score * 100).toFixed(1)}% उपयुक्त
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="rec-badge">
+                                                            {rec.score >= 0.8 && <span className="badge high">उत्तम</span>}
+                                                            {rec.score >= 0.6 && rec.score < 0.8 && <span className="badge medium">अच्छा</span>}
+                                                            {rec.score < 0.6 && <span className="badge low">संभावित</span>}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="rec-body">
+                                                        <p className="rec-description">{rec.data.description}</p>
+
+                                                        <div className="rec-details">
+                                                            <div className="detail-item">
+                                                                <strong>⏱️ Duration:</strong> {rec.data.duration}
+                                                            </div>
+                                                            <div className="detail-item">
+                                                                <strong>📈 Expected Yield:</strong> {rec.data.yield}
+                                                            </div>
+                                                            <div className="detail-item">
+                                                                <strong>🌡️ Conditions:</strong> {rec.data.optimal_conditions}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="rec-tips">
+                                                            <strong>💡 Tips:</strong> {rec.data.tips}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="no-results">
+                                        <div className="no-results-icon">🌱</div>
+                                        <h4>कृषि मापदंड दर्ज करें</h4>
+                                        <p>अपनी मिट्टी और पर्यावरणीय जानकारी भरें ताकि हम आपके लिए सबसे उपयुक्त फसलों की सिफारिश कर सकें।</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Export Modal */}
+                {showExportModal && (
+                    <div className="modal-overlay">
+                        <div className="modal">
+                            <div className="modal-header">
+                                <h3>📤 Export Recommendations</h3>
+                                <button
+                                    className="modal-close"
+                                    onClick={() => setShowExportModal(false)}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Choose how you'd like to export your crop recommendations:</p>
+                                <div className="export-options">
+                                    <button
+                                        className="btn btn--outline"
+                                        onClick={copyResults}
+                                    >
+                                        📋 Copy to Clipboard
+                                    </button>
+                                    <button
+                                        className="btn btn--primary"
+                                        onClick={downloadResults}
+                                    >
+                                        💾 Download Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 )}
-              </div>
             </div>
-          </div>
-          {/* Analysis Charts */}
-          <div className="card analysis-section">
-            <div className="card__header">
-              <h3>📈 Agricultural Analysis</h3>
-            </div>
-            <div className="card__body">
-              <div className="charts-grid">
-                <div className="chart-item">
-                  <h4>Feature Importance</h4>
-                  <img src="/feature_importance_crop_recommendation.png" alt="Feature Importance Chart" className="analysis-chart" />
-                </div>
-                <div className="chart-item">
-                  <h4>Model Performance</h4>
-                  <img src="/model_performance_comparison.png" alt="Model Performance Chart" className="analysis-chart" />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-      {/* Export Modal */}
-      {showExport && (
-        <div className="modal" style={{ display: 'flex' }}>
-          <div className="modal-backdrop" onClick={handleCloseExport}></div>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>📋 Export Results</h3>
-              <button className="modal-close" onClick={handleCloseExport}>&times;</button>
-            </div>
-            <div className="modal-body">
-              <textarea ref={exportTextRef} className="form-control" rows={10} readOnly value={exportText()} />
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn--outline" onClick={handleCopy}>Copy to Clipboard</button>
-              <button className="btn btn--primary" onClick={handleDownload}>Download as Text</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+    );
+};
 
 export default CropRecommendation;

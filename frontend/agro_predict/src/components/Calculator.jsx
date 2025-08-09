@@ -1,0 +1,237 @@
+import React, { useState } from 'react';
+import { farmerData } from '../data/farmerData';
+
+const Calculator = () => {
+  const [formData, setFormData] = useState({
+    landHolding: '',
+    farmerType: 'small',
+    selectedSchemes: {}
+  });
+  const [results, setResults] = useState(null);
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        selectedSchemes: {
+          ...prev.selectedSchemes,
+          [name]: checked
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const calculateBenefits = (e) => {
+    e.preventDefault();
+    
+    const selectedSchemes = Object.keys(formData.selectedSchemes).filter(
+      scheme => formData.selectedSchemes[scheme]
+    );
+    
+    if (selectedSchemes.length === 0) {
+      alert('Please select at least one scheme');
+      return;
+    }
+    
+    const landHolding = parseFloat(formData.landHolding) || 0;
+    const profile = farmerData.farmer_profiles[formData.farmerType];
+    
+    const benefits = selectedSchemes.reduce((acc, scheme) => {
+      switch(scheme) {
+        case 'PM_KISAN':
+          acc.push({
+            name: 'PM Kisan Samman Nidhi',
+            amount: profile.pm_kisan,
+            description: 'Annual income support of ₹6,000 in three installments'
+          });
+          break;
+        case 'KCC':
+          acc.push({
+            name: 'Kisan Credit Card',
+            amount: profile.kcc_saving,
+            description: 'Annual interest savings on agricultural credit'
+          });
+          break;
+        case 'PMFBY':
+          acc.push({
+            name: 'PM Fasal Bima Yojana',
+            amount: -profile.pmfby_premium,
+            description: 'Crop insurance premium for comprehensive coverage'
+          });
+          break;
+        case 'SMAM':
+          acc.push({
+            name: 'Agriculture Mechanization',
+            amount: profile.smam_subsidy,
+            description: 'Subsidy for agricultural machinery and equipment'
+          });
+          break;
+        case 'PKVY':
+          acc.push({
+            name: 'Paramparagat Krishi',
+            amount: profile.pkvy_assistance,
+            description: 'Financial assistance for organic farming practices'
+          });
+          break;
+        default:
+          break;
+      }
+      return acc;
+    }, []);
+    
+    const totalBenefits = benefits.reduce((sum, benefit) => sum + benefit.amount, 0);
+    
+    setResults({
+      benefits,
+      total: totalBenefits,
+      landHolding,
+      farmerType: formData.farmerType
+    });
+  };
+
+  return (
+    <section id="calculator" className="calculator">
+      <div className="container">
+        <h2 className="section-title">Benefit Calculator</h2>
+        <div className="calculator__content">
+          <form onSubmit={calculateBenefits} className="calculator-form">
+            <div className="form-group">
+              <label htmlFor="landHolding">Land Holding (in acres):</label>
+              <input
+                type="number"
+                id="landHolding"
+                name="landHolding"
+                value={formData.landHolding}
+                onChange={handleInputChange}
+                min="0"
+                step="0.1"
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Farmer Type:</label>
+              <div className="radio-group">
+                <label>
+                  <input
+                    type="radio"
+                    name="farmerType"
+                    value="small"
+                    checked={formData.farmerType === 'small'}
+                    onChange={handleInputChange}
+                  />
+                  Small (0-2 ha)
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="farmerType"
+                    value="medium"
+                    checked={formData.farmerType === 'medium'}
+                    onChange={handleInputChange}
+                  />
+                  Medium (2-5 ha)
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="farmerType"
+                    value="large"
+                    checked={formData.farmerType === 'large'}
+                    onChange={handleInputChange}
+                  />
+                  Large (5+ ha)
+                </label>
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label>Select Schemes:</label>
+              <div className="checkbox-group">
+                {Object.entries(farmerData.schemes).map(([key, scheme]) => (
+                  <label key={key} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name={key}
+                      checked={formData.selectedSchemes[key] || false}
+                      onChange={handleInputChange}
+                    />
+                    {scheme.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+            
+            <button type="submit" className="btn btn--primary">
+              Calculate Benefits
+            </button>
+          </form>
+          
+          {results && (
+            <div className="calculator-results">
+              <h3>Estimated Annual Benefits</h3>
+              <div className="results-summary">
+                <div className="result-item">
+                  <span className="result-label">Land Holding:</span>
+                  <span className="result-value">{results.landHolding} acres</span>
+                </div>
+                <div className="result-item">
+                  <span className="result-label">Farmer Type:</span>
+                  <span className="result-value">
+                    {results.farmerType === 'small' ? 'Small' : 
+                     results.farmerType === 'medium' ? 'Medium' : 'Large'} Farmer
+                  </span>
+                </div>
+              </div>
+              
+              <div className="benefits-list">
+                <h4>Benefits Breakdown:</h4>
+                <ul>
+                  {results.benefits.map((benefit, index) => (
+                    <li key={index} className="benefit-item">
+                      <span className="benefit-name">{benefit.name}:</span>
+                      <span className={`benefit-amount ${benefit.amount >= 0 ? 'positive' : 'negative'}`}>
+                        {benefit.amount >= 0 ? '+' : ''}{benefit.amount.toLocaleString('en-IN', {
+                          style: 'currency',
+                          currency: 'INR',
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        })}
+                      </span>
+                      <div className="benefit-description">{benefit.description}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="total-benefits">
+                <span className="total-label">Total Annual Benefits:</span>
+                <span className={`total-amount ${results.total >= 0 ? 'positive' : 'negative'}`}>
+                  {results.total >= 0 ? '+' : ''}{results.total.toLocaleString('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  })}
+                </span>
+              </div>
+              
+              <div className="results-note">
+                <p>Note: These are estimated values. Actual benefits may vary based on specific eligibility criteria and government guidelines.</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Calculator;

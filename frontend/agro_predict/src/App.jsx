@@ -1,136 +1,130 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import HomePage from "./pages/HomePage";
-import RegisterPage from "./pages/RegisterPage";
-import DiseasePestDashboard from "./pages/DiseasePestDashboard";
-import Financial from "./pages/Financial";
-import SoilAnalysis from "./pages/SoilAnalysis";
-import EnvironmentalMonitoring from "./pages/EnvironmentalMonitoring";
-import CropRecommendation from "./pages/CropRecommendation";
-import "./App.css";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
-// Authentication Context
-const AuthContext = createContext();
+// Components
+import Navbar from './components/Navbar';
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+// Pages
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import HomePage from './pages/HomePage';
+import DiseasePestDashboard from './pages/DiseasePestDashboard';
+import Financial from './pages/Financial';
+import SoilAnalysis from './pages/SoilAnalysis';
+import EnvironmentalMonitoring from './pages/EnvironmentalMonitoring';
+import CropRecommendation from './pages/CropRecommendation';
+import NotFound from './pages/NotFound';
 
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
-
-// Auth Provider Component
-const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // Check localStorage for existing login state
-    const savedAuth = localStorage.getItem('agrowork-auth');
-    if (savedAuth) {
-      const authData = JSON.parse(savedAuth);
-      setIsAuthenticated(authData.isAuthenticated);
-      setUser(authData.user);
-    }
-  }, []);
-
-  const login = (userData) => {
-    setIsAuthenticated(true);
-    setUser(userData);
-    localStorage.setItem('agrowork-auth', JSON.stringify({
-      isAuthenticated: true,
-      user: userData
-    }));
-  };
-
-  const logout = () => {
-    setIsAuthenticated(false);
-    setUser(null);
-    localStorage.removeItem('agrowork-auth');
-  };
-
-  const register = (userData) => {
-    setIsAuthenticated(true);
-    setUser(userData);
-    localStorage.setItem('agrowork-auth', JSON.stringify({
-      isAuthenticated: true,
-      user: userData
-    }));
-  };
-
-  const value = {
-    isAuthenticated,
-    user,
-    login,
-    logout,
-    register
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+// Styles
+import './App.css';
+import './styles/NotFound.css';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            
-            {/* Protected Routes */}
-            <Route path="/home" element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/crop-recommendation" element={
-              <ProtectedRoute>
-                <CropRecommendation />
-              </ProtectedRoute>
-            } />
-            <Route path="/disease-pest-dashboard" element={
-              <ProtectedRoute>
-                <DiseasePestDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/soil-analysis" element={
-              <ProtectedRoute>
-                <SoilAnalysis />
-              </ProtectedRoute>
-            } />
-            <Route path="/financial-assistance" element={
-              <ProtectedRoute>
-                <Financial />
-              </ProtectedRoute>
-            } />
-            <Route path="/environmental-monitoring" element={
-              <ProtectedRoute>
-                <EnvironmentalMonitoring />
-              </ProtectedRoute>
-            } />
-            
-            {/* Default redirects */}
-            <Route path="/" element={<Navigate to="/home" replace />} />
-            <Route path="*" element={<Navigate to="/home" replace />} />
-          </Routes>
+        <div className="app">
+          <Navbar />
+          <main className="main-content">
+            <Routes>
+              {/* Public Routes */}
+              <Route
+                path="/login"
+                element={
+                  <PublicRoute>
+                    <LoginPage />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <PublicRoute>
+                    <RegisterPage />
+                  </PublicRoute>
+                }
+              />
+              
+              {/* Protected Routes */}
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/disease-pest"
+                element={
+                  <ProtectedRoute>
+                    <DiseasePestDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/financial"
+                element={
+                  <ProtectedRoute>
+                    <Financial />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/soil-analysis"
+                element={
+                  <ProtectedRoute>
+                    <SoilAnalysis />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/environmental-monitoring"
+                element={
+                  <ProtectedRoute>
+                    <EnvironmentalMonitoring />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/crop-recommendation"
+                element={
+                  <ProtectedRoute>
+                    <CropRecommendation />
+                  </ProtectedRoute>
+                }
+              />
+              
+              {/* Default and 404 Routes */}
+              <Route path="/" element={<Navigate to="/home" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
         </div>
       </Router>
     </AuthProvider>
   );
 }
+
+// Public Route Component - Redirects to home if user is already logged in
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="loading-container">Loading...</div>;
+  }
+  
+  console.log('PublicRoute - User state:', { user, loading });
+  
+  if (user) {
+    console.log('PublicRoute: User is authenticated, redirecting to /home');
+    return <Navigate to="/home" replace />;
+  }
+  
+  console.log('PublicRoute: No user, rendering public content');
+  return children;
+};
 
 export default App;

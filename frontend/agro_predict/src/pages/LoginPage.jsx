@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
+import { useAuth } from '../contexts/AuthContext';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -16,32 +16,42 @@ const LoginPage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    console.log('LoginPage: handleLogin called');
+    
     if (!email || !password) {
-      setError('Email and password are required.');
+      const errorMsg = 'Email and password are required.';
+      console.log('LoginPage: Validation error -', errorMsg);
+      setError(errorMsg);
       return;
     }
 
     setIsLoading(true);
     setError('');
+    console.log('LoginPage: Attempting to log in...');
 
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('LoginPage: Calling login function with email:', email);
+      const result = await login(email, password);
+      console.log('LoginPage: login result:', result);
       
-      // Fake login validation
-      if (email === 'demo@agrowork.com' && password === 'password') {
-        login({
-          email: email,
-          name: 'Demo User',
-          id: '1'
-        });
-        navigate('/home');
+      if (result.success) {
+        console.log('LoginPage: Login successful, navigating to /home');
+        navigate('/home', { replace: true });
       } else {
-        setError('Invalid email or password. Try demo@agrowork.com / password');
+        const errorMsg = result.message || 'Invalid email or password';
+        console.error('LoginPage: Login failed -', errorMsg, result);
+        setError(errorMsg);
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      const errorMsg = 'An error occurred during login. Please try again.';
+      console.error('LoginPage: Error during login:', {
+        message: err.message,
+        error: err,
+        response: err.response?.data
+      });
+      setError(errorMsg);
     } finally {
+      console.log('LoginPage: Login attempt completed');
       setIsLoading(false);
     }
   };

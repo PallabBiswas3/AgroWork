@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
+import { useAuth } from '../contexts/AuthContext';
 import './RegisterPage.css';
 
 const RegisterPage = () => {
@@ -48,23 +48,46 @@ const RegisterPage = () => {
     setIsLoading(true);
     setError('');
 
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Register the user
-      register({
+      // Combine first and last name for the backend
+      const result = await register({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
-        name: `${formData.firstName} ${formData.lastName}`,
-        id: Date.now().toString(),
-        phone: formData.phone,
+        password: formData.password,
+        phone: formData.phone || '',
         farmType: formData.farmType
       });
       
-      navigate('/home');
+      if (result.success) {
+        navigate('/home');
+      } else {
+        setError(result.message || 'Registration failed. Please try again.');
+      }
     } catch (err) {
-      setError('Registration failed. Please try again.');
-    } finally {
+      console.error('Full registration error:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        request: {
+          url: err.config?.url,
+          method: err.config?.method,
+          data: err.config?.data,
+          headers: err.config?.headers
+        },
+        stack: err.stack
+      });
+      
+      let errorMessage = 'An error occurred during registration. Please try again.';
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
       setIsLoading(false);
     }
   };

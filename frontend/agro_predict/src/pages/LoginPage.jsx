@@ -16,42 +16,27 @@ const LoginPage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('LoginPage: handleLogin called');
     
     if (!email || !password) {
-      const errorMsg = 'Email and password are required.';
-      console.log('LoginPage: Validation error -', errorMsg);
-      setError(errorMsg);
+      setError('Email and password are required.');
       return;
     }
 
     setIsLoading(true);
     setError('');
-    console.log('LoginPage: Attempting to log in...');
 
     try {
-      console.log('LoginPage: Calling login function with email:', email);
       const result = await login(email, password);
-      console.log('LoginPage: login result:', result);
       
       if (result.success) {
-        console.log('LoginPage: Login successful, navigating to /home');
         navigate('/home', { replace: true });
       } else {
-        const errorMsg = result.message || 'Invalid email or password';
-        console.error('LoginPage: Login failed -', errorMsg, result);
-        setError(errorMsg);
+        setError(result.message || 'Login failed. Please try again.');
       }
-    } catch (err) {
-      const errorMsg = 'An error occurred during login. Please try again.';
-      console.error('LoginPage: Error during login:', {
-        message: err.message,
-        error: err,
-        response: err.response?.data
-      });
-      setError(errorMsg);
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('An error occurred during login. Please try again.');
     } finally {
-      console.log('LoginPage: Login attempt completed');
       setIsLoading(false);
     }
   };
@@ -66,13 +51,17 @@ const LoginPage = () => {
     setIsLoading(true);
     setError('');
 
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Password reset link has been sent to your email!');
-      setShowForgotPassword(false);
-      setForgotEmail('');
-    } catch (err) {
+      const result = await resetPassword(forgotEmail);
+      if (result.success) {
+        alert('Password reset link has been sent to your email!');
+        setShowForgotPassword(false);
+        setForgotEmail('');
+      } else {
+        setError(result.message || 'Failed to send reset email.');
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
       setError('Failed to send reset email. Please try again.');
     } finally {
       setIsLoading(false);

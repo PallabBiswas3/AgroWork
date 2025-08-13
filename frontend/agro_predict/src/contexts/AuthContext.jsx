@@ -1,5 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import api from '../services/api';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  sendPasswordResetEmail
+} from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase/config';
 
 const AuthContext = createContext(null);
 
@@ -8,78 +16,117 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuthStatus();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Get additional user data from Firestore
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          ...userDoc.data()
+        });
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const checkAuthStatus = async () => {
+  const login = async (email, password) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
-        return;
+      await signInWithEmailAndPassword(auth, email, password);
+      return { success: true };
+    } catch (error) {
+      console.error('Login failed:', error);
+      let message = 'Login failed. Please check your credentials.';
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          message = 'Invalid email or password.';
+          break;
+        case 'auth/too-many-requests':
+          message = 'Too many failed attempts. Please try again later or reset your password.';
+          break;
+        case 'auth/user-disabled':
+          message = 'This account has been disabled.';
+          break;
       }
       
-      const response = await api.get('/auth/me');
-      setUser(response.data.data);
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const login = async (email, password) => {
-    console.log('AuthContext: login called with email:', email);
-    try {
-      const response = await api.post('/auth/login', { email, password });
-      console.log('AuthContext: login response:', response.data);
-      
-      const { token, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      console.log('AuthContext: token saved to localStorage');
-      
-      setUser(user);
-      console.log('AuthContext: user state updated:', user);
-      
-      return { success: true, user };
-    } catch (error) {
-      console.error('AuthContext: login failed:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Login failed',
-        error: error.message
-      };
+      return { success: false, message };
     }
   };
 
   const register = async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData);
-      const { token, user } = response.data;
+      // Create user with email and password
+      const { user: firebaseUser } = await createUserWithEmailAndPassword(
+        auth, 
+        userData.email, 
+        userData.password
+      );
+
+      // Create user document in Firestore
+      const userDoc = {
+        uid: firebaseUser.uid,
+        email: userData.email,
+        name: userData.name,
+        farmType: userData.farmType || 'general',
+        createdAt: new Date().toISOString(),
+      };
+
+      await setDoc(doc(db, 'users', firebaseUser.uid), userDoc);
       
-      localStorage.setItem('token', token);
-      setUser(user);
+      // Update local user state
+      setUser({
+        uid: firebaseUser.uid,
+        ...userDoc
+      });
       
       return { success: true };
     } catch (error) {
       console.error('Registration failed:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed' 
-      };
+      let message = 'Registration failed. Please try again.';
+      
+      if (error.code === 'auth/email-already-in-use') {
+        message = 'An account with this email already exists.';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'Password should be at least 6 characters.';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Please enter a valid email address.';
+      }
+      
+      return { success: false, message };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    return { success: true };
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      return { success: true };
+    } catch (error) {
+      console.error('Logout failed:', error);
+      return { success: false, message: 'Logout failed. Please try again.' };
+    }
+  };
+
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error) {
+      console.error('Password reset failed:', error);
+      let message = 'Failed to send password reset email.';
+      
+      if (error.code === 'auth/user-not-found') {
+        message = 'No account found with this email address.';
+      }
+      
+      return { success: false, message };
+    }
   };
 
   const value = {
@@ -88,6 +135,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    resetPassword,
     isAuthenticated: !!user,
   };
 

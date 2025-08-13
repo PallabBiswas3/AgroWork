@@ -1,13 +1,15 @@
 /* Modern Register Page Styles */
 .register-container {
-	min-height: 100vh;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	padding: 20px;
-	position: relative;
-	overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0;
+  margin: 0;
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Animated Background */
@@ -77,22 +79,20 @@
 
 /* Register Card */
 .register-card {
-	background: rgba(255, 255, 255, 0.95);
-	backdrop-filter: blur(10px);
-	padding: 40px;
-	border-radius: 20px;
-	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-	width: 100%;
-	max-width: 600px;
-	position: relative;
-	z-index: 2;
-	border: 1px solid rgba(255, 255, 255, 0.2);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 2;
+  margin: 1rem;
 }
 
-/* Header */
 .register-header {
-	text-align: center;
-	margin-bottom: 30px;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .logo-container {
@@ -144,9 +144,53 @@
 }
 
 .form-row {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .register-card {
+    padding: 2.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 480px) {
+  .register-card {
+    margin: 0.5rem;
+    padding: 1.5rem 1rem;
+  }
+  
+  .register-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .welcome-text {
+    font-size: 0.95rem;
+  }
+  
+  .input-wrapper input,
+  .input-wrapper select {
+    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .input-icon {
+    left: 10px;
+    font-size: 1rem;
+  }
+  
+  .terms-checkbox label {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
 }
 
 .input-group {
@@ -242,17 +286,21 @@
 
 /* Button */
 .register-btn {
-	padding: 15px;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: white;
-	border: none;
-	border-radius: 12px;
-	font-size: 1rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: all 0.3s ease;
-	position: relative;
-	overflow: hidden;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .register-btn:hover:not(:disabled) {

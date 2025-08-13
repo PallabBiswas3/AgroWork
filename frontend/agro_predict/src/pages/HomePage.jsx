@@ -195,7 +195,7 @@ const HomePage = () => {
               </div>
             </div>
             
-            <div className="feature-card" onClick={() => navigate('/financial-assistance')}>
+            <div className="feature-card" onClick={() => navigate('/financial')}>
               <div className="feature-icon">💰</div>
               <h3 className="feature-title">Financial Assistance</h3>
               <p className="feature-description">

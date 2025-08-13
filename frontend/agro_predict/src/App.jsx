@@ -57,7 +57,7 @@ function App() {
                 }
               />
               <Route
-                path="/disease-pest"
+                path="/disease-pest-dashboard"
                 element={
                   <ProtectedRoute>
                     <DiseasePestDashboard />

@@ -1,5 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { Suspense } from 'react';
+import './i18n';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -26,7 +27,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="app">
-          <Navbar />
+          <ConditionalNavbar />
           <main className="main-content">
             <Routes>
               {/* Public Routes */}
@@ -107,6 +108,16 @@ function App() {
     </AuthProvider>
   );
 }
+
+// Hide Navbar on certain routes (e.g., financial portal has its own header)
+const ConditionalNavbar = () => {
+  const location = useLocation();
+  const hideOnRoutes = ['/financial'];
+  if (hideOnRoutes.includes(location.pathname)) {
+    return null;
+  }
+  return <Navbar />;
+};
 
 // Public Route Component - Redirects to home if user is already logged in
 const PublicRoute = ({ children }) => {

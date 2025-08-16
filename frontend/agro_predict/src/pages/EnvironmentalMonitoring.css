@@ -1,7 +1,8 @@
 /* EnvironmentalMonitoring.css */
 
 .environmental-monitoring {
-  padding: var(--space-6) 0;
+  /* Add top offset to avoid fixed navbar overlap */
+  padding: 88px 0 var(--space-6);
   background-color: var(--color-background);
   min-height: 100vh;
 }
@@ -37,6 +38,7 @@
   padding: var(--space-6);
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--space-6);
+  border: 1px solid var(--color-border-light);
 }
 
 .card h2 {
@@ -70,12 +72,20 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   transition: var(--transition-default);
+  background-color: var(--color-surface);
+  color: var(--color-text);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: var(--color-teal-500);
-  box-shadow: 0 0 0 2px rgba(33, 128, 141, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+/* Placeholder contrast */
+.form-group input::placeholder {
+  color: var(--color-text-lighter);
+  opacity: 1;
 }
 
 .btn {
@@ -92,15 +102,16 @@
 }
 
 .btn-primary {
-  background-color: var(--color-teal-500);
-  color: white;
+  background: var(--gradient-primary);
+  color: #fff;
   width: 100%;
   padding: var(--space-3) var(--space-4);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
 }
 
 .btn-primary:hover {
-  background-color: var(--color-teal-600);
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.25);
 }
 
 .btn-primary:active {
@@ -148,7 +159,7 @@
   text-align: center;
   box-shadow: var(--shadow-sm);
   transition: var(--transition-default);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-light);
 }
 
 .metric-card:hover {
@@ -185,7 +196,7 @@
 
 /* Status Indicators */
 .status-optimal {
-  border-top: 3px solid var(--color-teal-500);
+  border-top: 3px solid var(--color-success);
 }
 
 .status-moderate {

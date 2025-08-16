@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Eligibility = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ const Eligibility = () => {
   });
   
   const [results, setResults] = useState(null);
+  const { t } = useTranslation();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -118,11 +120,11 @@ const Eligibility = () => {
   return (
     <section id="eligibility" className="eligibility">
       <div className="container">
-        <h2 className="section-title">Check Your Eligibility</h2>
+        <h2 className="section-title">{t('financial.eligibility.title')}</h2>
         <div className="eligibility__content">
           <form onSubmit={checkEligibility} className="eligibility-form">
             <div className="form-group">
-              <label htmlFor="landOwnership">Land Ownership (in acres):</label>
+              <label htmlFor="landOwnership">{t('financial.eligibility.land_label')}</label>
               <input
                 type="number"
                 id="landOwnership"
@@ -136,7 +138,7 @@ const Eligibility = () => {
             </div>
             
             <div className="form-group">
-              <label htmlFor="annualIncome">Annual Income (in ₹):</label>
+              <label htmlFor="annualIncome">{t('financial.eligibility.annual_income_label')}</label>
               <input
                 type="number"
                 id="annualIncome"
@@ -149,7 +151,7 @@ const Eligibility = () => {
             </div>
             
             <div className="form-group">
-              <label htmlFor="familyIncome">Family Annual Income (in ₹):</label>
+              <label htmlFor="familyIncome">{t('financial.eligibility.family_income_label')}</label>
               <input
                 type="number"
                 id="familyIncome"
@@ -162,7 +164,7 @@ const Eligibility = () => {
             </div>
             
             <div className="form-group">
-              <label>Category:</label>
+              <label>{t('financial.eligibility.category_label')}</label>
               <div className="radio-group">
                 <label>
                   <input
@@ -172,7 +174,7 @@ const Eligibility = () => {
                     checked={formData.caste === 'general'}
                     onChange={handleChange}
                   />
-                  General
+                  {t('financial.eligibility.cat_general')}
                 </label>
                 <label>
                   <input
@@ -182,7 +184,7 @@ const Eligibility = () => {
                     checked={formData.caste === 'obc'}
                     onChange={handleChange}
                   />
-                  OBC
+                  {t('financial.eligibility.cat_obc')}
                 </label>
                 <label>
                   <input
@@ -192,7 +194,7 @@ const Eligibility = () => {
                     checked={formData.caste === 'sc'}
                     onChange={handleChange}
                   />
-                  SC
+                  {t('financial.eligibility.cat_sc')}
                 </label>
                 <label>
                   <input
@@ -202,13 +204,13 @@ const Eligibility = () => {
                     checked={formData.caste === 'st'}
                     onChange={handleChange}
                   />
-                  ST
+                  {t('financial.eligibility.cat_st')}
                 </label>
               </div>
             </div>
             
             <div className="form-group">
-              <label>Gender:</label>
+              <label>{t('financial.eligibility.gender_label')}</label>
               <div className="radio-group">
                 <label>
                   <input
@@ -218,7 +220,7 @@ const Eligibility = () => {
                     checked={formData.gender === 'male'}
                     onChange={handleChange}
                   />
-                  Male
+                  {t('financial.eligibility.male')}
                 </label>
                 <label>
                   <input
@@ -228,7 +230,7 @@ const Eligibility = () => {
                     checked={formData.gender === 'female'}
                     onChange={handleChange}
                   />
-                  Female
+                  {t('financial.eligibility.female')}
                 </label>
                 <label>
                   <input
@@ -238,13 +240,13 @@ const Eligibility = () => {
                     checked={formData.gender === 'other'}
                     onChange={handleChange}
                   />
-                  Other
+                  {t('financial.eligibility.other')}
                 </label>
               </div>
             </div>
             
             <div className="form-group">
-              <label>Are you a farmer?</label>
+              <label>{t('financial.eligibility.is_farmer_label')}</label>
               <div className="radio-group">
                 <label>
                   <input
@@ -254,7 +256,7 @@ const Eligibility = () => {
                     checked={formData.isFarmer === 'yes'}
                     onChange={handleChange}
                   />
-                  Yes
+                  {t('financial.eligibility.yes')}
                 </label>
                 <label>
                   <input
@@ -264,13 +266,13 @@ const Eligibility = () => {
                     checked={formData.isFarmer === 'no'}
                     onChange={handleChange}
                   />
-                  No
+                  {t('financial.eligibility.no')}
                 </label>
               </div>
             </div>
             
             <div className="form-group">
-              <label>Do you already have a Kisan Credit Card?</label>
+              <label>{t('financial.eligibility.has_kcc_label')}</label>
               <div className="radio-group">
                 <label>
                   <input
@@ -280,7 +282,7 @@ const Eligibility = () => {
                     checked={formData.hasKcc === 'yes'}
                     onChange={handleChange}
                   />
-                  Yes
+                  {t('financial.eligibility.yes')}
                 </label>
                 <label>
                   <input
@@ -290,13 +292,13 @@ const Eligibility = () => {
                     checked={formData.hasKcc === 'no'}
                     onChange={handleChange}
                   />
-                  No
+                  {t('financial.eligibility.no')}
                 </label>
               </div>
             </div>
             
             <div className="form-group">
-              <label>Are you a pensioner receiving more than ₹10,000/month?</label>
+              <label>{t('financial.eligibility.is_pensioner_label')}</label>
               <div className="radio-group">
                 <label>
                   <input
@@ -306,7 +308,7 @@ const Eligibility = () => {
                     checked={formData.isPensioner === 'yes'}
                     onChange={handleChange}
                   />
-                  Yes
+                  {t('financial.eligibility.yes')}
                 </label>
                 <label>
                   <input
@@ -316,13 +318,13 @@ const Eligibility = () => {
                     checked={formData.isPensioner === 'no'}
                     onChange={handleChange}
                   />
-                  No
+                  {t('financial.eligibility.no')}
                 </label>
               </div>
             </div>
             
             <div className="form-group">
-              <label>Do you pay income tax?</label>
+              <label>{t('financial.eligibility.pays_tax_label')}</label>
               <div className="radio-group">
                 <label>
                   <input
@@ -332,7 +334,7 @@ const Eligibility = () => {
                     checked={formData.paysTax === 'yes'}
                     onChange={handleChange}
                   />
-                  Yes
+                  {t('financial.eligibility.yes')}
                 </label>
                 <label>
                   <input
@@ -342,54 +344,54 @@ const Eligibility = () => {
                     checked={formData.paysTax === 'no'}
                     onChange={handleChange}
                   />
-                  No
+                  {t('financial.eligibility.no')}
                 </label>
               </div>
             </div>
             
             <button type="submit" className="btn btn--primary">
-              Check Eligibility
+              {t('financial.eligibility.submit')}
             </button>
           </form>
           
           {results && (
             <div className="eligibility-results">
-              <h3>Eligibility Results</h3>
+              <h3>{t('financial.eligibility.results_title')}</h3>
               
               {results.totalEligible > 0 ? (
                 <>
                   <div className="results-summary">
-                    <p>Based on your profile, you are eligible for <strong>{results.totalEligible} government schemes</strong>.</p>
+                    <p dangerouslySetInnerHTML={{ __html: t('financial.eligibility.summary_text', { count: results.totalEligible }) }} />
                   </div>
                   
                   <div className="eligible-schemes">
-                    <h4>Eligible Schemes:</h4>
+                    <h4>{t('financial.eligibility.eligible_title')}</h4>
                     <div className="schemes-list">
                       {results.eligibleSchemes.map((scheme, index) => (
                         <div key={index} className="scheme-card">
                           <h5>{scheme.name}</h5>
                           <p className="scheme-description">{scheme.description}</p>
-                          <p className="scheme-reason"><strong>Why you qualify:</strong> {scheme.reason}</p>
+                          <p className="scheme-reason"><strong>{t('financial.eligibility.why_qualify')}</strong> {scheme.reason}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                   
                   <div className="next-steps">
-                    <h4>Next Steps:</h4>
+                    <h4>{t('financial.eligibility.next_steps_title')}</h4>
                     <ol>
-                      <li>Click on 'Apply Now' next to any scheme to start your application</li>
-                      <li>Gather necessary documents (Aadhaar, Land Records, Bank Details, etc.)</li>
-                      <li>Visit your nearest Common Service Center (CSC) for assistance</li>
-                      <li>For any queries, call Kisan Call Center: 1800-180-1551</li>
+                      <li>{t('financial.eligibility.next_1')}</li>
+                      <li>{t('financial.eligibility.next_2')}</li>
+                      <li>{t('financial.eligibility.next_3')}</li>
+                      <li>{t('financial.eligibility.next_4')}</li>
                     </ol>
                   </div>
                 </>
               ) : (
                 <div className="no-eligibility">
-                  <p>Based on the information provided, you may not be eligible for the major central government schemes at this time.</p>
-                  <p>However, you may still be eligible for state-specific schemes. Please visit your nearest agriculture office for more information.</p>
-                  <p>You may also want to check back later as scheme guidelines and eligibility criteria may change.</p>
+                  <p>{t('financial.eligibility.no_eligibility_1')}</p>
+                  <p>{t('financial.eligibility.no_eligibility_2')}</p>
+                  <p>{t('financial.eligibility.no_eligibility_3')}</p>
                 </div>
               )}
             </div>

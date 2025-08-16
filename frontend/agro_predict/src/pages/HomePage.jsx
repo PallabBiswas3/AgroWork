@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import "./HomePage.css";
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,18 +53,19 @@ const HomePage = () => {
           </div>
           
           <div className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`}>
-            <a href="#home" onClick={() => scrollToSection('home')}>Home</a>
-            <a href="#about" onClick={() => scrollToSection('about')}>About</a>
-            <a href="#services" onClick={() => scrollToSection('services')}>Services</a>
-            <a href="#contact" onClick={() => scrollToSection('contact')}>Contact</a>
+            <a href="#home" onClick={() => scrollToSection('home')}>{t('home.nav.home')}</a>
+            <a href="#about" onClick={() => scrollToSection('about')}>{t('home.nav.about')}</a>
+            <a href="#services" onClick={() => scrollToSection('services')}>{t('home.nav.services')}</a>
+            <a href="#contact" onClick={() => scrollToSection('contact')}>{t('home.nav.contact')}</a>
           </div>
           
           <div className="nav-actions">
             <div className="user-info">
-              <span className="user-name">Welcome, {user?.name || 'Farmer'}!</span>
+              <span className="user-name">{t('home.labels.welcome_user', { name: user?.name || 'Farmer' })}</span>
             </div>
+            <LanguageSwitcher />
             <button className="btn-logout" onClick={handleLogout}>
-              Logout
+              {t('home.labels.logout')}
             </button>
           </div>
           
@@ -89,20 +93,19 @@ const HomePage = () => {
         <div className="hero-content">
           <div className="hero-text">
             <h1 className="hero-title">
-              Empowering Farmers with
-              <span className="gradient-text"> AI</span>
+              {t('home.hero.title_prefix')}
+              <span className="gradient-text"> {t('home.hero.title_accent')}</span>
             </h1>
             <p className="hero-subtitle">
-              Get real-time support for soil analysis, pest detection, weather forecasting, and financial planning. 
-              Transform your farming with intelligent insights.
+              {t('home.hero.subtitle')}
             </p>
             <div className="hero-actions">
               <button className="btn-primary" onClick={handleGetStarted}>
-                Get Started
+                {t('home.hero.get_started')}
                 <span className="btn-icon">→</span>
               </button>
               <button className="btn-secondary">
-                Watch Demo
+                {t('home.hero.watch_demo')}
                 <span className="btn-icon">▶</span>
               </button>
             </div>
@@ -131,10 +134,8 @@ const HomePage = () => {
       <section id="services" className="features-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">AI-Powered Tools</h2>
-            <p className="section-subtitle">
-              Comprehensive solutions designed specifically for modern agriculture
-            </p>
+            <h2 className="section-title">{t('home.features.title')}</h2>
+            <p className="section-subtitle">{t('home.features.subtitle')}</p>
           </div>
           
           <div className="features-grid">
@@ -144,12 +145,10 @@ const HomePage = () => {
               style={{ cursor: 'pointer' }}
             >
               <div className="feature-icon">🌱</div>
-              <h3 className="feature-title">Crop Advisor</h3>
-              <p className="feature-description">
-                Get personalized crop recommendations based on your soil and climate conditions.
-              </p>
+              <h3 className="feature-title">{t('home.features.crop_advisor.title')}</h3>
+              <p className="feature-description">{t('home.features.crop_advisor.desc')}</p>
               <div className="feature-btn">
-                Get Started
+                {t('home.features.crop_advisor.cta')}
                 <span className="btn-icon">→</span>
               </div>
             </div>
@@ -160,24 +159,20 @@ const HomePage = () => {
               style={{ cursor: 'pointer' }}
             >
               <div className="feature-icon">🧪</div>
-              <h3 className="feature-title">Soil Analysis</h3>
-              <p className="feature-description">
-                Get detailed soil health report and fertilizer recommendations.
-              </p>
+              <h3 className="feature-title">{t('home.features.soil_analysis.title')}</h3>
+              <p className="feature-description">{t('home.features.soil_analysis.desc')}</p>
               <div className="feature-btn">
-                Analyze Now
+                {t('home.features.soil_analysis.cta')}
                 <span className="btn-icon">→</span>
               </div>
             </div>
             
             <div className="feature-card" onClick={() => navigate('/disease-pest-dashboard')}>
               <div className="feature-icon">🔍</div>
-              <h3 className="feature-title">Disease Detector</h3>
-              <p className="feature-description">
-                Upload plant images to identify diseases and get treatment recommendations.
-              </p>
+              <h3 className="feature-title">{t('home.features.disease_detector.title')}</h3>
+              <p className="feature-description">{t('home.features.disease_detector.desc')}</p>
               <button className="feature-btn">
-                Start Chat
+                {t('home.features.disease_detector.cta')}
                 <span className="btn-icon">→</span>
               </button>
             </div>
@@ -185,24 +180,20 @@ const HomePage = () => {
             
             <div className="feature-card" onClick={() => navigate('/environmental-monitoring')}>
               <div className="feature-icon">🌍</div>
-              <h3 className="feature-title">Environmental Monitoring</h3>
-              <p className="feature-description">
-                Monitor and analyze environmental conditions for optimal crop growth.
-              </p>
+              <h3 className="feature-title">{t('home.features.env_monitoring.title')}</h3>
+              <p className="feature-description">{t('home.features.env_monitoring.desc')}</p>
               <div className="feature-btn">
-                Monitor Now
+                {t('home.features.env_monitoring.cta')}
                 <span className="btn-icon">→</span>
               </div>
             </div>
             
             <div className="feature-card" onClick={() => navigate('/financial')}>
               <div className="feature-icon">💰</div>
-              <h3 className="feature-title">Financial Assistance</h3>
-              <p className="feature-description">
-                Explore government schemes and calculate your potential benefits.
-              </p>
+              <h3 className="feature-title">{t('home.features.financial.title')}</h3>
+              <p className="feature-description">{t('home.features.financial.desc')}</p>
               <button className="feature-btn">
-                Explore Now
+                {t('home.features.financial.cta')}
                 <span className="btn-icon">→</span>
               </button>
             </div>
@@ -216,20 +207,16 @@ const HomePage = () => {
       <section className="how-it-works-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">How It Works</h2>
-            <p className="section-subtitle">
-              Get started in just three simple steps
-            </p>
+            <h2 className="section-title">{t('home.how_it_works.title')}</h2>
+            <p className="section-subtitle">{t('home.how_it_works.subtitle')}</p>
           </div>
           
           <div className="steps-container">
             <div className="step">
               <div className="step-number">1</div>
               <div className="step-icon">👤</div>
-              <h3 className="step-title">Create Account</h3>
-              <p className="step-description">
-                Sign up for free and get instant access to all AI tools
-              </p>
+              <h3 className="step-title">{t('home.how_it_works.step1_title')}</h3>
+              <p className="step-description">{t('home.how_it_works.step1_desc')}</p>
             </div>
             
             <div className="step-connector"></div>
@@ -237,10 +224,8 @@ const HomePage = () => {
             <div className="step">
               <div className="step-number">2</div>
               <div className="step-icon">💬</div>
-              <h3 className="step-title">Ask Questions</h3>
-              <p className="step-description">
-                Chat with our AI assistants about any farming concern
-              </p>
+              <h3 className="step-title">{t('home.how_it_works.step2_title')}</h3>
+              <p className="step-description">{t('home.how_it_works.step2_desc')}</p>
             </div>
             
             <div className="step-connector"></div>
@@ -248,10 +233,8 @@ const HomePage = () => {
             <div className="step">
               <div className="step-number">3</div>
               <div className="step-icon">🎯</div>
-              <h3 className="step-title">Get Solutions</h3>
-              <p className="step-description">
-                Receive instant, accurate advice tailored to your needs
-              </p>
+              <h3 className="step-title">{t('home.how_it_works.step3_title')}</h3>
+              <p className="step-description">{t('home.how_it_works.step3_desc')}</p>
             </div>
           </div>
         </div>
@@ -261,16 +244,14 @@ const HomePage = () => {
       <section className="testimonials-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">What Farmers Say</h2>
-            <p className="section-subtitle">
-              Join thousands of farmers who trust AGROWORK
-            </p>
+            <h2 className="section-title">{t('home.testimonials.title')}</h2>
+            <p className="section-subtitle">{t('home.testimonials.subtitle')}</p>
           </div>
           
           <div className="testimonials-grid">
             <div className="testimonial-card">
               <div className="testimonial-content">
-                <p>"AGROWORK helped me increase my crop yield by 30% with their soil analysis recommendations."</p>
+                <p>"{t('home.testimonials.t1')}"</p>
               </div>
               <div className="testimonial-author">
                 <div className="author-avatar">👨‍🌾</div>
@@ -283,7 +264,7 @@ const HomePage = () => {
             
             <div className="testimonial-card">
               <div className="testimonial-content">
-                <p>"The pest detection feature saved my entire tomato crop. Highly recommended!"</p>
+                <p>"{t('home.testimonials.t2')}"</p>
               </div>
               <div className="testimonial-author">
                 <div className="author-avatar">👩‍🌾</div>
@@ -296,7 +277,7 @@ const HomePage = () => {
             
             <div className="testimonial-card">
               <div className="testimonial-content">
-                <p>"Weather predictions are spot-on. I plan my irrigation schedule perfectly now."</p>
+                <p>"{t('home.testimonials.t3')}"</p>
               </div>
               <div className="testimonial-author">
                 <div className="author-avatar">👨‍🌾</div>
@@ -320,7 +301,7 @@ const HomePage = () => {
                 <span className="logo-text">AGROWORK</span>
               </div>
               <p className="footer-description">
-                Empowering farmers with AI-driven insights for sustainable and profitable agriculture.
+                {t('home.footer.desc')}
               </p>
               <div className="social-links">
                 <a href="#" className="social-link">📘</a>
@@ -331,32 +312,32 @@ const HomePage = () => {
             </div>
             
             <div className="footer-section">
-              <h4>Quick Links</h4>
+              <h4>{t('home.footer.quick_links')}</h4>
               <ul className="footer-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#home">{t('home.nav.home')}</a></li>
+                <li><a href="#about">{t('home.nav.about')}</a></li>
+                <li><a href="#services">{t('home.nav.services')}</a></li>
+                <li><a href="#contact">{t('home.nav.contact')}</a></li>
                 <li><a href="/crop-recommendation">Crop Recommendation</a></li>
                 <li><a href="/disease-pest-dashboard">Disease & Pest Dashboard</a></li>
               </ul>
             </div>
             
             <div className="footer-section">
-              <h4>Services</h4>
+              <h4>{t('home.footer.services')}</h4>
               <ul className="footer-links">
-                <li><a href="/soil-analysis">Soil Analysis</a></li>
+                <li><a href="/soil-analysis">{t('home.features.soil_analysis.title')}</a></li>
                 <li><a href="/chat/soil">Soil Chat</a></li>
-                <li><a href="/chat/pest">Pest Detection</a></li>
+                <li><a href="/chat/pest">{t('home.features.disease_detector.title')}</a></li>
                 <li><a href="/chat/weather">Weather Forecast</a></li>
                 <li><a href="/chat/finance">Financial Planning</a></li>
-                <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                <li><a href="/crop-recommendation">{t('home.features.crop_advisor.title')}</a></li>
                 <li><a href="/disease-pest-dashboard">Disease Dashboard</a></li>
               </ul>
             </div>
             
             <div className="footer-section">
-              <h4>Contact Info</h4>
+              <h4>{t('home.footer.contact_info')}</h4>
               <div className="contact-info">
                 <p>📧 support@agrowork.com</p>
                 <p>📞 +91 98765 43210</p>
@@ -366,7 +347,7 @@ const HomePage = () => {
           </div>
           
           <div className="footer-bottom">
-            <p>&copy; 2024 AGROWORK. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} AGROWORK. {t('home.footer.copyright')}</p>
           </div>
         </div>
       </footer>

@@ -21,15 +21,38 @@
 	left: 0;
 	right: 0;
 	z-index: 1000;
-	background: rgba(255, 255, 255, 0.95);
-	backdrop-filter: blur(10px);
+	/* Solid background to avoid dim/washed look over dark sections */
+	background: linear-gradient(90deg, #00a0c8,blue);
 	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 	transition: all 0.3s ease;
+	position: fixed;
+}
+
+/* Exotic animated gradient accent bar at the bottom of navbar */
+.navbar::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 3px;
+	
+	background-size: 300% 100%;
+	animation: navbarRainbow 10s linear infinite;
 }
 
 .navbar.scrolled {
-	background: rgba(255, 255, 255, 0.98);
+	background: #ffffff;
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes navbarRainbow {
+	0% {
+		background-position: 0% 50%;
+	}
+	100% {
+		background-position: 300% 50%;
+	}
 }
 
 .nav-container {
@@ -77,7 +100,7 @@
 }
 
 .nav-links a:hover {
-	color: #667eea;
+	color: #2e7d32;
 }
 
 .nav-links a::after {
@@ -87,12 +110,26 @@
 	left: 0;
 	width: 0;
 	height: 2px;
-	background: linear-gradient(135deg, #667eea, #764ba2);
+	background: #2e7d32;
 	transition: width 0.3s ease;
 }
 
 .nav-links a:hover::after {
 	width: 100%;
+}
+
+/* Active nav pill: compact, subtle, and theme-aligned */
+.nav-links a.active {
+	color: #2e7d32;
+	background: rgba(46, 125, 50, 0.08);
+	border: 1px solid rgba(46, 125, 50, 0.15);
+	padding: 6px 10px;
+	border-radius: 999px;
+	box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.08), 0 6px 16px rgba(46, 125, 50, 0.15);
+}
+
+.nav-links a.active::after {
+	width: 0;
 }
 
 .nav-actions {

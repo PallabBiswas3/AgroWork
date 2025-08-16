@@ -1,43 +1,42 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Hero = ({ navigateToSection }) => {
+  const { t } = useTranslation();
   return (
     <section id="home" className="hero">
       <div className="container">
         <div className="hero__content">
           <div className="hero__text">
-            <h1 className="hero__title">Empowering Farmers Across India</h1>
-            <p className="hero__description">
-              Access comprehensive financial assistance through 27+ government schemes. 
-              Join 9.7 crore farmers already benefiting from ₹10+ lakh crore investment.
-            </p>
+            <h1 className="hero__title">{t('financial.hero.title')}</h1>
+            <p className="hero__description">{t('financial.hero.description')}</p>
             <div className="hero__actions">
               <button 
                 className="btn btn--primary btn--lg" 
                 onClick={() => navigateToSection('calculator')}
               >
-                Calculate Benefits
+                {t('financial.hero.cta_calculate')}
               </button>
               <button 
                 className="btn btn--outline btn--lg" 
                 onClick={() => navigateToSection('schemes')}
               >
-                Explore Schemes
+                {t('financial.hero.cta_explore')}
               </button>
             </div>
           </div>
           <div className="hero__stats">
             <div className="stat-card">
-              <div className="stat-card__number">₹10+</div>
-              <div className="stat-card__label">Lakh Crore Investment</div>
+              <div className="stat-card__number">{t('financial.hero.stats.investment_value')}</div>
+              <div className="stat-card__label">{t('financial.hero.stats.investment_label')}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-card__number">9.7</div>
-              <div className="stat-card__label">Crore Beneficiaries</div>
+              <div className="stat-card__number">{t('financial.hero.stats.beneficiaries_value')}</div>
+              <div className="stat-card__label">{t('financial.hero.stats.beneficiaries_label')}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-card__number">27+</div>
-              <div className="stat-card__label">Schemes</div>
+              <div className="stat-card__number">{t('financial.hero.stats.schemes_value')}</div>
+              <div className="stat-card__label">{t('financial.hero.stats.schemes_label')}</div>
             </div>
           </div>
         </div>

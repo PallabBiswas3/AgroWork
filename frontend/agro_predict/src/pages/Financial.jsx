@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { farmerData } from '../data/farmerData';
 import './Financial.css';
+import { useTranslation } from 'react-i18next';
 
 // Import components
 import Header from '../components/Header';
@@ -14,6 +15,7 @@ import Footer from '../components/Footer';
 const Financial = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [schemeData, setSchemeData] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Load scheme data
@@ -34,7 +36,7 @@ const Financial = () => {
     return (
       <div className="loading-container">
         <div className="spinner"></div>
-        <p>Loading financial assistance portal...</p>
+        <p>{t('financial.loading.loading')}</p>
       </div>
     );
   }

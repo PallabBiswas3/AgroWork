@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { farmerData } from '../data/farmerData';
+import { useTranslation } from 'react-i18next';
 
 const Calculator = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +9,7 @@ const Calculator = () => {
     selectedSchemes: {}
   });
   const [results, setResults] = useState(null);
+  const { t } = useTranslation();
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -36,7 +38,7 @@ const Calculator = () => {
     );
     
     if (selectedSchemes.length === 0) {
-      alert('Please select at least one scheme');
+      alert(t('financial.calculator.alert_select_one'));
       return;
     }
     
@@ -99,11 +101,11 @@ const Calculator = () => {
   return (
     <section id="calculator" className="calculator">
       <div className="container">
-        <h2 className="section-title">Benefit Calculator</h2>
+        <h2 className="section-title">{t('financial.calculator.title')}</h2>
         <div className="calculator__content">
           <form onSubmit={calculateBenefits} className="calculator-form">
             <div className="form-group">
-              <label htmlFor="landHolding">Land Holding (in acres):</label>
+              <label htmlFor="landHolding">{t('financial.calculator.land_label')}</label>
               <input
                 type="number"
                 id="landHolding"
@@ -117,7 +119,7 @@ const Calculator = () => {
             </div>
             
             <div className="form-group">
-              <label>Farmer Type:</label>
+              <label>{t('financial.calculator.farmer_type_label')}</label>
               <div className="radio-group">
                 <label>
                   <input
@@ -127,7 +129,7 @@ const Calculator = () => {
                     checked={formData.farmerType === 'small'}
                     onChange={handleInputChange}
                   />
-                  Small (0-2 ha)
+                  {t('financial.calculator.farmer_small')}
                 </label>
                 <label>
                   <input
@@ -137,7 +139,7 @@ const Calculator = () => {
                     checked={formData.farmerType === 'medium'}
                     onChange={handleInputChange}
                   />
-                  Medium (2-5 ha)
+                  {t('financial.calculator.farmer_medium')}
                 </label>
                 <label>
                   <input
@@ -147,13 +149,13 @@ const Calculator = () => {
                     checked={formData.farmerType === 'large'}
                     onChange={handleInputChange}
                   />
-                  Large (5+ ha)
+                  {t('financial.calculator.farmer_large')}
                 </label>
               </div>
             </div>
             
             <div className="form-group">
-              <label>Select Schemes:</label>
+              <label>{t('financial.calculator.select_schemes')}</label>
               <div className="checkbox-group">
                 {Object.entries(farmerData.schemes).map(([key, scheme]) => (
                   <label key={key} className="checkbox-label">
@@ -170,29 +172,29 @@ const Calculator = () => {
             </div>
             
             <button type="submit" className="btn btn--primary">
-              Calculate Benefits
+              {t('financial.calculator.submit')}
             </button>
           </form>
           
           {results && (
             <div className="calculator-results">
-              <h3>Estimated Annual Benefits</h3>
+              <h3>{t('financial.calculator.results_title')}</h3>
               <div className="results-summary">
                 <div className="result-item">
-                  <span className="result-label">Land Holding:</span>
+                  <span className="result-label">{t('financial.calculator.result_land')}</span>
                   <span className="result-value">{results.landHolding} acres</span>
                 </div>
                 <div className="result-item">
-                  <span className="result-label">Farmer Type:</span>
+                  <span className="result-label">{t('financial.calculator.result_farmer_type')}</span>
                   <span className="result-value">
-                    {results.farmerType === 'small' ? 'Small' : 
-                     results.farmerType === 'medium' ? 'Medium' : 'Large'} Farmer
+                    {results.farmerType === 'small' ? t('financial.calculator.type_small') : 
+                     results.farmerType === 'medium' ? t('financial.calculator.type_medium') : t('financial.calculator.type_large')}{t('financial.calculator.type_suffix_farmer')}
                   </span>
                 </div>
               </div>
               
               <div className="benefits-list">
-                <h4>Benefits Breakdown:</h4>
+                <h4>{t('financial.calculator.benefits_breakdown')}</h4>
                 <ul>
                   {results.benefits.map((benefit, index) => (
                     <li key={index} className="benefit-item">
@@ -212,7 +214,7 @@ const Calculator = () => {
               </div>
               
               <div className="total-benefits">
-                <span className="total-label">Total Annual Benefits:</span>
+                <span className="total-label">{t('financial.calculator.total_label')}</span>
                 <span className={`total-amount ${results.total >= 0 ? 'positive' : 'negative'}`}>
                   {results.total >= 0 ? '+' : ''}{results.total.toLocaleString('en-IN', {
                     style: 'currency',
@@ -224,7 +226,7 @@ const Calculator = () => {
               </div>
               
               <div className="results-note">
-                <p>Note: These are estimated values. Actual benefits may vary based on specific eligibility criteria and government guidelines.</p>
+                <p>{t('financial.calculator.note')}</p>
               </div>
             </div>
           )}

@@ -26,7 +26,7 @@ const Navbar = () => {
           <>
             <Link to="/home">{t('navbar.home')}</Link>
             <Link to="/crop-recommendation">{t('navbar.crop_recommendation')}</Link>
-            <Link to="/disease-pest">{t('navbar.disease_pest')}</Link>
+            <Link to="/disease-pest-dashboard">{t('navbar.disease_pest')}</Link>
             <Link to="/soil-analysis">{t('navbar.soil_analysis')}</Link>
             <Link to="/environmental-monitoring">{t('navbar.environmental_monitoring')}</Link>
             <Link to="/financial">{t('navbar.financial')}</Link>

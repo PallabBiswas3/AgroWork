@@ -43,50 +43,136 @@ const Calculator = () => {
     }
     
     const landHolding = parseFloat(formData.landHolding) || 0;
-    const profile = farmerData.farmer_profiles[formData.farmerType];
-    
-    const benefits = selectedSchemes.reduce((acc, scheme) => {
-      switch(scheme) {
+    const profile = farmerData.farmer_profiles[formData.farmerType] || {};
+
+    const schemeEntries = farmerData.schemes;
+
+    const getBenefitForScheme = (schemeKey) => {
+      const s = schemeEntries[schemeKey] || {};
+      const desc = s.description || '';
+      switch (schemeKey) {
         case 'PM_KISAN':
-          acc.push({
-            name: 'PM Kisan Samman Nidhi',
-            amount: profile.pm_kisan,
-            description: 'Annual income support of ₹6,000 in three installments'
-          });
-          break;
+          return {
+            name: s.name,
+            amount: profile.pm_kisan ?? 0,
+            description: desc || 'Annual income support of ₹6,000 in three installments'
+          };
         case 'KCC':
-          acc.push({
-            name: 'Kisan Credit Card',
-            amount: profile.kcc_saving,
-            description: 'Annual interest savings on agricultural credit'
-          });
-          break;
+          return {
+            name: s.name,
+            amount: profile.kcc_saving ?? 0,
+            description: desc || 'Estimated annual interest savings via subvention'
+          };
         case 'PMFBY':
-          acc.push({
-            name: 'PM Fasal Bima Yojana',
-            amount: -profile.pmfby_premium,
-            description: 'Crop insurance premium for comprehensive coverage'
-          });
-          break;
+          return {
+            name: s.name,
+            amount: -(profile.pmfby_premium ?? 0),
+            description: desc || 'Out-of-pocket premium towards crop insurance'
+          };
         case 'SMAM':
-          acc.push({
-            name: 'Agriculture Mechanization',
-            amount: profile.smam_subsidy,
-            description: 'Subsidy for agricultural machinery and equipment'
-          });
-          break;
+          return {
+            name: s.name,
+            amount: profile.smam_subsidy ?? 0,
+            description: desc || 'Subsidy for agricultural machinery and equipment'
+          };
         case 'PKVY':
-          acc.push({
-            name: 'Paramparagat Krishi',
-            amount: profile.pkvy_assistance,
-            description: 'Financial assistance for organic farming practices'
-          });
-          break;
+          // Assistance often per hectare; approximate by landHolding if numeric
+          {
+            const base = profile.pkvy_assistance ?? 0;
+            return {
+              name: s.name,
+              amount: base,
+              description: desc || 'Assistance towards organic farming practices'
+            };
+          }
+        case 'AIF':
+          // Interest subvention benefit approximation: aif_loan * (interest_subvention/100) for 1 year
+          {
+            const loan = profile.aif_loan ?? 0;
+            const sub = typeof s.interest_subvention === 'number' ? s.interest_subvention : 3;
+            const annualBenefit = Math.round((loan * sub) / 100);
+            return {
+              name: s.name,
+              amount: annualBenefit,
+              description: `${desc || 'Interest subvention benefit'}`
+            };
+          }
+        case 'PM_KUSUM':
+          return {
+            name: s.name,
+            amount: 0,
+            description: desc || 'Subsidy reduces pump cost; treated as non-cash here'
+          };
+        case 'RYTHU_BANDHU':
+          // Per-acre per-season support
+          {
+            const perAcre = typeof s.amount_per_acre_per_season === 'number' ? s.amount_per_acre_per_season : 0;
+            const seasons = typeof s.seasons_per_year === 'number' ? s.seasons_per_year : 0;
+            const amt = Math.round(perAcre * seasons * landHolding);
+            return {
+              name: s.name,
+              amount: amt,
+              description: desc || 'Investment support per acre per season (approx by land holding)'
+            };
+          }
+        case 'ANNADATA_SUKHIBHAVA':
+          return {
+            name: s.name,
+            amount: typeof s.amount === 'number' ? s.amount : 0,
+            description: desc || 'State annual support including central + state share'
+          };
+        case 'PMKMY':
+          return {
+            name: s.name,
+            amount: 0,
+            description: desc || 'Pension benefit at age 60 (non-cash in current year)'
+          };
+        case 'eNAM':
+          return {
+            name: s.name,
+            amount: 0,
+            description: desc || 'Market linkage platform benefit (non-cash)'
+          };
+        case 'SHG_BANK_LINKAGE':
+          return {
+            name: s.name,
+            amount: profile.shg_access ?? profile.shg_loan ?? 0,
+            description: desc || 'Credit access via SHGs; using accessible credit as proxy'
+          };
+        case 'JLG_FINANCING':
+          return {
+            name: s.name,
+            amount: profile.jlg_loan ?? 0,
+            description: desc || 'Group lending access; using loan limit as proxy benefit'
+          };
+        case 'PM_VAN_DHAN':
+          return {
+            name: s.name,
+            amount: profile.van_dhan_support ?? 0,
+            description: desc || 'Value addition support for forest produce'
+          };
+        case 'PVTG_DEVELOPMENT':
+          return {
+            name: s.name,
+            amount: profile.pvtg_assistance ?? 0,
+            description: desc || 'Targeted assistance for PVTG families'
+          };
+        case 'EMRS':
+          return {
+            name: s.name,
+            amount: 0,
+            description: profile.emrs_education ? `${profile.emrs_education}` : (desc || 'Education support (non-monetary)')
+          };
         default:
-          break;
+          return {
+            name: s.name || schemeKey,
+            amount: 0,
+            description: desc || 'Benefit not quantified in calculator'
+          };
       }
-      return acc;
-    }, []);
+    };
+    
+    const benefits = selectedSchemes.map(getBenefitForScheme).filter(Boolean);
     
     const totalBenefits = benefits.reduce((sum, benefit) => sum + benefit.amount, 0);
     
@@ -150,6 +236,36 @@ const Calculator = () => {
                     onChange={handleInputChange}
                   />
                   {t('financial.calculator.farmer_large')}
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="farmerType"
+                    value="tribal_small"
+                    checked={formData.farmerType === 'tribal_small'}
+                    onChange={handleInputChange}
+                  />
+                  {t('financial.calculator.farmer_tribal_small')}
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="farmerType"
+                    value="marginal_woman"
+                    checked={formData.farmerType === 'marginal_woman'}
+                    onChange={handleInputChange}
+                  />
+                  {t('financial.calculator.farmer_marginal_woman')}
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="farmerType"
+                    value="tenant_farmer"
+                    checked={formData.farmerType === 'tenant_farmer'}
+                    onChange={handleInputChange}
+                  />
+                  {t('financial.calculator.farmer_tenant')}
                 </label>
               </div>
             </div>

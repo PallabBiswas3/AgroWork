@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { farmerData } from '../data/farmerData';
 
 const Eligibility = () => {
   const [formData, setFormData] = useState({
@@ -44,62 +45,78 @@ const Eligibility = () => {
     const annualIncomeNum = parseFloat(annualIncome) || 0;
     const familyIncomeNum = parseFloat(familyIncome) || 0;
     const landOwnershipNum = parseFloat(landOwnership) || 0;
-    
-    // PM-KISAN Eligibility
-    if (isFarmer === 'yes' && landOwnershipNum > 0 && 
-        isPensioner === 'no' && paysTax === 'no' && familyIncomeNum < 1000000) {
+
+    const addScheme = (key, reason) => {
+      const scheme = farmerData.schemes[key];
+      if (!scheme) return;
       eligibleSchemes.push({
-        name: 'PM Kisan Samman Nidhi',
-        description: 'Income support of ₹6,000 per year in three equal installments',
-        reason: 'You meet the basic eligibility criteria for small and marginal farmers.'
+        name: scheme.name,
+        description: scheme.description,
+        reason
       });
+    };
+
+    const isSmallOrMarginal = landOwnershipNum > 0 && landOwnershipNum <= 2;
+    const isSCST = caste === 'sc' || caste === 'st';
+    const isFarmerBool = isFarmer === 'yes';
+    const hasLand = landOwnershipNum > 0;
+
+    // PM-KISAN
+    if (
+      isFarmerBool && hasLand && isPensioner === 'no' && paysTax === 'no' && familyIncomeNum < 1000000
+    ) {
+      addScheme('PM_KISAN', 'Meets core criteria: landholder farmer, non-taxpayer, non-pensioner, income below threshold.');
     }
-    
-    // KCC Eligibility
-    if (isFarmer === 'yes' && landOwnershipNum > 0) {
-      eligibleSchemes.push({
-        name: 'Kisan Credit Card (KCC)',
-        description: 'Credit access with interest subvention benefits',
-        reason: 'All farmers with land ownership are eligible for KCC.'
-      });
+
+    // KCC
+    if (isFarmerBool && hasLand) {
+      addScheme('KCC', 'Landholder farmers are eligible for KCC with interest subvention.');
     }
-    
-    // PMFBY Eligibility
-    if (isFarmer === 'yes' && landOwnershipNum > 0) {
-      eligibleSchemes.push({
-        name: 'PM Fasal Bima Yojana',
-        description: 'Crop insurance with low premium rates',
-        reason: 'Available to all farmers growing notified crops in notified areas.'
-      });
+
+    // PMFBY
+    if (isFarmerBool && hasLand) {
+      addScheme('PMFBY', 'Available for farmers growing notified crops in notified areas.');
     }
-    
-    // Special schemes for women farmers
-    if (gender === 'female' && isFarmer === 'yes') {
-      eligibleSchemes.push({
-        name: 'Mahila Kisan Sashaktikaran Pariyojana',
-        description: 'Special support for women farmers',
-        reason: 'Special provisions and higher subsidies for women farmers.'
-      });
+
+    // SMAM (Machinery subsidy)
+    if (isFarmerBool && hasLand) {
+      addScheme('SMAM', isSCST || gender === 'female' ? 'Eligible with higher subsidy as Woman/SC/ST farmer.' : 'Eligible for machinery subsidy support.');
     }
-    
-    // Special schemes for SC/ST farmers
-    if ((caste === 'sc' || caste === 'st') && isFarmer === 'yes') {
-      eligibleSchemes.push({
-        name: 'Special Schemes for SC/ST Farmers',
-        description: 'Additional benefits and subsidies',
-        reason: 'Special schemes available for SC/ST category farmers.'
-      });
+
+    // PKVY (Organic farming assistance)
+    if (isFarmerBool) {
+      addScheme('PKVY', 'Eligible for organic farming assistance; per-hectare support available.');
     }
-    
-    // Special schemes for small farmers
-    if (landOwnershipNum > 0 && landOwnershipNum <= 2) {
-      eligibleSchemes.push({
-        name: 'Special Schemes for Small Farmers',
-        description: 'Additional support for small and marginal farmers',
-        reason: 'You qualify as a small/marginal farmer.'
-      });
+
+    // PM-KUSUM (Solar pumps)
+    if (isFarmerBool && hasLand) {
+      addScheme('PM_KUSUM', 'Eligible for solar pump subsidy; rates vary by region.');
     }
-    
+
+    // SHG-Bank Linkage (women focus but open wider)
+    if (gender === 'female' || isSCST || isSmallOrMarginal) {
+      addScheme('SHG_BANK_LINKAGE', 'Priority access via SHG-Bank linkage (women/SC/ST/small farmers).');
+    }
+
+    // JLG (useful for landless/tenant)
+    if (!hasLand) {
+      addScheme('JLG_FINANCING', 'Suitable for landless/tenant/small farmers via group credit without collateral.');
+    }
+
+    // Tribal-focused programs
+    if (caste === 'st') {
+      addScheme('PM_VAN_DHAN', 'Tribal livelihood enhancement through Van Dhan Kendras.');
+      addScheme('PM_JANMAN', 'Targeted development for PVTGs and tribal communities.');
+      addScheme('PM_JUGA', 'Comprehensive tribal village development support.');
+      addScheme('PVTG_DEVELOPMENT', 'Focused benefits for Particularly Vulnerable Tribal Groups.');
+      addScheme('EMRS', 'Education support via tribal residential schools.');
+    }
+
+    // Small/Marginal farmer general hint
+    if (isSmallOrMarginal) {
+      addScheme('RYTHU_BANDHU', 'Small/marginal farmers benefit more from per-acre/state support where applicable.');
+    }
+
     setResults({
       eligibleSchemes,
       totalEligible: eligibleSchemes.length,

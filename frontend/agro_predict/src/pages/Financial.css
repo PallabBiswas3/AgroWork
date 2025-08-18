@@ -888,7 +888,7 @@ body {
 }
 
 .scheme-card {
-  background: white;
+  background: #857676;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -1189,7 +1189,7 @@ body {
 }
 
 .story-card {
-  background: white;
+  background: black;
   padding: var(--space-20);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);

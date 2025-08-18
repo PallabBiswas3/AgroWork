@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import "./HomePage.css";
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { Box } from '@mui/material';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -45,38 +46,51 @@ const HomePage = () => {
   return (
     <div className="homepage">
       {/* Navigation Bar */}
-      <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
-        <div className="nav-container">
-          <div className="nav-logo">
-            <span className="logo-icon">🌱</span>
-            <span className="logo-text">AGROWORK</span>
-          </div>
+      <nav className="navbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div className="navbar-brand" style={{ flexShrink: 0 }}>
+          <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>
+            <span style={{ marginRight: '8px' }}>🌱</span>
+            <span>AGROWORK</span>
+          </Link>
+        </div>
+        
+        <div className="navbar-links" style={{ display: 'flex', alignItems: 'center' }}>
+          <a href="#home" onClick={() => scrollToSection('home')} style={{ color: 'white', textDecoration: 'none', padding: '0.5rem 1rem' }}>
+            {t('home.nav.home')}
+          </a>
+          <a href="#about" onClick={() => scrollToSection('about')} style={{ color: 'white', textDecoration: 'none', padding: '0.5rem 1rem' }}>
+            {t('home.nav.about')}
+          </a>
+          <a href="#services" onClick={() => scrollToSection('services')} style={{ color: 'white', textDecoration: 'none', padding: '0.5rem 1rem' }}>
+            {t('home.nav.services')}
+          </a>
+          <a href="#contact" onClick={() => scrollToSection('contact')} style={{ color: 'white', textDecoration: 'none', padding: '0.5rem 1rem' }}>
+            {t('home.nav.contact')}
+          </a>
           
-          <div className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`}>
-            <a href="#home" onClick={() => scrollToSection('home')}>{t('home.nav.home')}</a>
-            <a href="#about" onClick={() => scrollToSection('about')}>{t('home.nav.about')}</a>
-            <a href="#services" onClick={() => scrollToSection('services')}>{t('home.nav.services')}</a>
-            <a href="#contact" onClick={() => scrollToSection('contact')}>{t('home.nav.contact')}</a>
-          </div>
-          
-          <div className="nav-actions">
-            <div className="user-info">
-              <span className="user-name">{t('home.labels.welcome_user', { name: user?.name || 'Farmer' })}</span>
-            </div>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '1.5rem', ml: 2 }}>
+            <span style={{ color: 'white' }}>
+              {t('home.labels.welcome_user', { name: user?.name || 'Farmer' })}
+            </span>
             <LanguageSwitcher />
-            <button className="btn-logout" onClick={handleLogout}>
+            <button 
+              onClick={handleLogout} 
+              style={{
+                background: '#e74c3c',
+                color: 'white',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                transition: 'background-color 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.background = '#c0392b'}
+              onMouseOut={(e) => e.target.style.background = '#e74c3c'}
+            >
               {t('home.labels.logout')}
             </button>
-          </div>
-          
-          <button 
-            className={`mobile-menu-btn ${isMobileMenuOpen ? 'active' : ''}`}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
+          </Box>
         </div>
       </nav>
 

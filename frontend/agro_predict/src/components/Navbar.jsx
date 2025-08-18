@@ -17,8 +17,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-brand">
+    <nav className="navbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      <div className="navbar-brand" style={{ flexShrink: 0 }}>
         <Link to="/">{t('navbar.brand')}</Link>
       </div>
       <div className="navbar-links" style={{ display: 'flex', alignItems: 'center' }}>
@@ -30,9 +30,11 @@ const Navbar = () => {
             <Link to="/soil-analysis">{t('navbar.soil_analysis')}</Link>
             <Link to="/environmental-monitoring">{t('navbar.environmental_monitoring')}</Link>
             <Link to="/financial">{t('navbar.financial')}</Link>
-            <button onClick={handleLogout} className="logout-btn">{t('navbar.logout')}</button>
-            <Box sx={{ ml: 2 }}>
-              <LanguageSwitcher />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <Box>
+                <LanguageSwitcher />
+              </Box>
+              <button onClick={handleLogout} className="logout-btn">{t('navbar.logout')}</button>
             </Box>
           </>
         ) : (

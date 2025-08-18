@@ -674,7 +674,9 @@ body {
   padding: var(--space-16) 0;
   box-shadow: var(--shadow-md);
   position: sticky;
-  top: 0;
+  top: var(--navbar-height, 64px);
+  /* small visual gap below the universal navbar */
+  margin-top: var(--space-8);
   z-index: 100;
 }
 

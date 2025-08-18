@@ -1,14 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const Header = ({ activeSection, navigateToSection }) => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
-  
-  const handleBackToHome = () => {
-    navigate('/home');
-  };
   return (
     <header className="header">
       <div className="container">
@@ -18,13 +12,6 @@ const Header = ({ activeSection, navigateToSection }) => {
             <p className="header__subtitle">{t('financial.header.subtitle')}</p>
           </div>
           <nav className="header__nav">
-            <button 
-              className="nav-btn back-btn"
-              onClick={handleBackToHome}
-              title={t('financial.header.back_title')}
-            >
-              {t('financial.header.back_label')}
-            </button>
             <button 
               className={`nav-btn ${activeSection === 'home' ? 'active' : ''}`} 
               onClick={() => navigateToSection('home')}

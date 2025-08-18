@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 // Import components
 import Header from '../components/Header';
+import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import Schemes from '../components/Schemes';
 import Calculator from '../components/Calculator';
@@ -43,6 +44,8 @@ const Financial = () => {
 
   return (
     <div className="financial-portal">
+      {/* Universal navbar at the very top */}
+      <Navbar />
       <Header 
         activeSection={activeSection} 
         navigateToSection={navigateToSection} 

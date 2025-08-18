@@ -118,10 +118,16 @@ const HomePage = () => {
                 {t('home.hero.get_started')}
                 <span className="btn-icon">→</span>
               </button>
-              <button className="btn-secondary">
+              <button className="btn-secondary" onClick={() => window.open("https://youtu.be/gpjXTkC_vTY", "_blank")}>
                 {t('home.hero.watch_demo')}
-                <span className="btn-icon">▶</span>
+                <span
+                  className="btn-icon"
+                  
+                >
+                  ▶
+                </span>
               </button>
+
             </div>
           </div>
           

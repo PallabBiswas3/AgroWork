@@ -17,6 +17,7 @@ import SoilAnalysis from './pages/SoilAnalysis';
 import EnvironmentalMonitoring from './pages/EnvironmentalMonitoring';
 import CropRecommendation from './pages/CropRecommendation';
 import NotFound from './pages/NotFound';
+import Chatbot from './pages/Chatbot';
 
 // Styles
 import './App.css';
@@ -70,6 +71,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Financial />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chatbot"
+                element={
+                  <ProtectedRoute>
+                    <Chatbot />
                   </ProtectedRoute>
                 }
               />

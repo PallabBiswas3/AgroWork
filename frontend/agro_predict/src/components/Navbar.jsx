@@ -30,6 +30,7 @@ const Navbar = () => {
             <Link to="/soil-analysis">{t('navbar.soil_analysis')}</Link>
             <Link to="/environmental-monitoring">{t('navbar.environmental_monitoring')}</Link>
             <Link to="/financial">{t('navbar.financial')}</Link>
+            <Link to="/chatbot">Chatbot</Link>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
               <Box>
                 <LanguageSwitcher />

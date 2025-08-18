@@ -10,6 +10,7 @@ const Chatbot = () => {
   const [error, setError] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
+  const [selectedLang, setSelectedLang] = useState('English');
 
   const messagesEndRef = useRef(null);
 
@@ -67,8 +68,9 @@ const Chatbot = () => {
     setError('');
 
     try {
+      const languageDirective = `Please reply strictly in ${selectedLang} for this conversation until I change the language.`;
       const body = {
-        contents: [{ parts: [{ text }]}],
+        contents: [{ parts: [{ text: `${languageDirective}\n\nUser: ${text}` }]}],
         generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 1024 }
       };
       const resp = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(key)}`, {
@@ -95,6 +97,28 @@ const Chatbot = () => {
     }
   };
 
+  const handleLanguageChange = async (e) => {
+    const newLang = e.target.value;
+    setSelectedLang(newLang);
+    // Send a silent directive to the model to switch language, plus show a small confirmation in UI
+    try {
+      const key = apiKey;
+      if (!key) return;
+      const directive = `From now on, reply strictly in ${newLang} until I change the language.`;
+      await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: directive }] }] })
+      }).catch(() => {});
+      setMessages(prev => ([
+        ...prev,
+        { id: (Date.now()+2).toString(), text: `Language set to ${newLang}.`, sender: 'ai', timestamp: new Date() }
+      ]));
+    } catch (_) {
+      // no-op UI side; the per-message directive still enforces language
+    }
+  };
+
   const clearChat = () => {
     setMessages([{ id: Date.now().toString(), text: 'Welcome to Gemini AI Chatbot! API key is required to chat.', sender: 'ai', timestamp: new Date() }]);
     setError('');
@@ -113,6 +137,18 @@ const Chatbot = () => {
         <header className="chatbot-header">
           <h1>AI Chatbot</h1>
           <div className="header-actions">
+            <select className="lang-select" value={selectedLang} onChange={handleLanguageChange}>
+              <option>English</option>
+              <option>Hindi</option>
+              <option>Bengali</option>
+              <option>Marathi</option>
+              <option>Gujarati</option>
+              <option>Tamil</option>
+              <option>Telugu</option>
+              <option>Kannada</option>
+              <option>Punjabi</option>
+              <option>Urdu</option>
+            </select>
             <button className="btn btn--outline btn--sm" onClick={() => setSettingsOpen(v => !v)}>Settings</button>
             <button className="btn btn--outline btn--sm" onClick={clearChat}>Clear Chat</button>
           </div>

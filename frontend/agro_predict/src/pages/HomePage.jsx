@@ -212,6 +212,19 @@ const HomePage = () => {
               </button>
             </div>
             
+            <div 
+              className="feature-card" 
+              onClick={() => navigate('/chatbot')}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="feature-icon">🤖</div>
+              <h3 className="feature-title">AI Chatbot</h3>
+              <p className="feature-description">Ask farming questions and get instant assistance.</p>
+              <div className="feature-btn">
+                Open Chatbot
+                <span className="btn-icon">→</span>
+              </div>
+            </div>
             
           </div>
         </div>

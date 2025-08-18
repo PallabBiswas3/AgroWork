@@ -55,6 +55,8 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
+  /* Add a little top spacing below navbar */
+  margin-top: 16px;
 }
 
 .chatbot-header {
@@ -130,6 +132,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .chatbot-app { max-width:none; border-radius:0; min-height: calc(100vh - 64px); }
+  .chatbot-app { max-width:none; border-radius:0; min-height: calc(100vh - 64px); margin-top: 12px; }
   .message { max-width:85%; }
 }

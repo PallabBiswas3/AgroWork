@@ -13,14 +13,15 @@ const Chatbot = () => {
 
   const messagesEndRef = useRef(null);
 
-  const apiKey = useMemo(() => {
-    return localStorage.getItem('GEMINI_API_KEY') || '';
-  }, []);
+    const apiKey = useMemo(() => {
+        return "AIzaSyBJJaY11RInBcJcIT6_dlBGtI71I6iy3no";
+    }, []);
+
 
   useEffect(() => {
     // Welcome message
     setMessages([
-      { id: Date.now().toString(), text: 'Welcome to Gemini AI Chatbot! Configure your API key in settings to start.', sender: 'ai', timestamp: new Date() }
+      { id: Date.now().toString(), text: 'Welcome to Agrowork AI Chatbot!', sender: 'ai', timestamp: new Date() }
     ]);
   }, []);
 
@@ -53,11 +54,11 @@ const Chatbot = () => {
     const text = input.trim();
     if (!text || loading) return;
 
-    const key = localStorage.getItem('GEMINI_API_KEY');
-    if (!key) {
-      setError('API key not set. Open Settings to add your Google Gemini API key.');
-      return;
-    }
+      const key = apiKey; // use hardcoded apiKey
+      if (!key) {
+          setError('API key not set.');
+          return;
+      }
 
     const userMsg = { id: Date.now().toString(), text, sender: 'user', timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);

@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Authenticate to GCP using SERVICE_ACCOUNT (as repo variable)
+      # Step 2: Authenticate to GCP using SERVICE_ACCOUNT
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
@@ -26,13 +26,14 @@ jobs:
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
-      # (Optional) Step 4: Build frontend
+      # Step 4: Install dependencies and build frontend
       - name: Install dependencies and build
         run: |
+          cd frontend/agro_predict
           npm install
           npm run build
 
       # Step 5: Deploy build output to GCS bucket
       - name: Deploy to GCS
         run: |
-          gsutil -m rsync -r ./dist gs://${{ vars.GCP_BUCKET_NAME }}
+          gsutil -m rsync -r frontend/agro_predict/dist gs://${{ vars.GCP_BUCKET_NAME }}

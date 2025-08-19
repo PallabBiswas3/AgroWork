@@ -90,21 +90,22 @@ const RegisterPage = () => {
         {error && <div className="error-alert">{error}</div>}
 
         <form onSubmit={handleSubmit} className="register-form">
-          <div className="form-row">
-            <div className="input-group">
-              <div className="form-group">
-                <label htmlFor="name">Full Name *</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+          <div className="input-group">
+            <label htmlFor="name">Full Name *</label>
+            <div className="input-wrapper">
+              <span className="input-icon">👤</span>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                required
+              />
             </div>
           </div>
+
 
           <div className="input-group">
             <label htmlFor="email">Email Address *</label>

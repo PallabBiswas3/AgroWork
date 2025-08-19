@@ -23,7 +23,11 @@ const HomePage = () => {
   }, []);
 
   const handleGetStarted = () => {
-    navigate('/home');
+    // Scroll to Services section on the same page
+    const el = document.getElementById('services');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleFeatureClick = (category) => {
@@ -144,6 +148,51 @@ const HomePage = () => {
               <div className="floating-card card-3">
                 <span className="card-icon">🌤️</span>
                 <span className="card-text">Weather Forecast</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="about-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">{t('home.about.title')}</h2>
+            <p className="section-subtitle">{t('home.about.subtitle')}</p>
+          </div>
+
+          <div className="about-grid">
+            <div className="about-text">
+              <p className="about-paragraph">{t('home.about.p1')}</p>
+              <ul className="about-list">
+                <li>🌾 {t('home.about.point1')}</li>
+                <li>🧪 {t('home.about.point2')}</li>
+                <li>💬 {t('home.about.point3')}</li>
+              </ul>
+            </div>
+
+            <div className="about-cards">
+              <div className="about-card">
+                <div className="about-card-icon">🤖</div>
+                <div>
+                  <h4 className="about-card-title">{t('home.about.card1_title')}</h4>
+                  <p className="about-card-desc">{t('home.about.card1_desc')}</p>
+                </div>
+              </div>
+              <div className="about-card">
+                <div className="about-card-icon">🛰️</div>
+                <div>
+                  <h4 className="about-card-title">{t('home.about.card2_title')}</h4>
+                  <p className="about-card-desc">{t('home.about.card2_desc')}</p>
+                </div>
+              </div>
+              <div className="about-card">
+                <div className="about-card-icon">🔒</div>
+                <div>
+                  <h4 className="about-card-title">{t('home.about.card3_title')}</h4>
+                  <p className="about-card-desc">{t('home.about.card3_desc')}</p>
+                </div>
               </div>
             </div>
           </div>

@@ -7,20 +7,20 @@ const CropRecommendation = () => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
-        // Soil nutrients
-        nitrogen: 50,
-        phosphorus: 40,
-        potassium: 40,
-        ph: 6.5,
+        // Soil nutrients (with sensible defaults)
+        nitrogen: 60,
+        phosphorus: 45,
+        potassium: 50,
+        ph: 6.8,
 
-        // Environmental conditions
+        // Environmental conditions (with sensible defaults)
         temperature: 28,
-        humidity: 70,
+        humidity: 75,
         rainfall: 120,
 
-        // Location and timing
-        season: 'Kharif',
-        state: 'KA',
+        // Location and timing (start empty so no recommendations until selected)
+        season: '',
+        state: '',
         district: ''
     });
 
@@ -34,7 +34,7 @@ const CropRecommendation = () => {
         const { name, value, type } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'number' ? parseFloat(value) || 0 : value
+            [name]: type === 'number' ? (value === '' ? '' : parseFloat(value)) : value
         }));
     };
 
@@ -139,12 +139,12 @@ const CropRecommendation = () => {
             nitrogen: 0,
             phosphorus: 0,
             potassium: 0,
-            ph: 7.0,
-            temperature: 0,
-            humidity: 0,
-            rainfall: 0,
-            season: 'Kharif',
-            state: 'KA',
+            ph: '',
+            temperature: '',
+            humidity: '',
+            rainfall: '',
+            season: '',
+            state: '',
             district: ''
         });
         setRecommendations([]);
@@ -154,6 +154,15 @@ const CropRecommendation = () => {
     // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
+        // Require basic details before generating
+        const requiredFilled =
+            formData.state && formData.season &&
+            Number(formData.nitrogen) > 0 && Number(formData.phosphorus) > 0 && Number(formData.potassium) > 0 &&
+            Number(formData.temperature) > 0 && Number(formData.rainfall) > 0;
+        if (!requiredFilled) {
+            setRecommendations([]);
+            return;
+        }
         generateRecommendations();
     };
 
@@ -204,9 +213,15 @@ const CropRecommendation = () => {
     // Auto-generate recommendations when form data changes
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (formData.nitrogen > 0 && formData.phosphorus > 0 && formData.potassium > 0 &&
-                formData.temperature > 0 && formData.rainfall > 0) {
+            const canAnalyze =
+                Number(formData.nitrogen) > 0 && Number(formData.phosphorus) > 0 && Number(formData.potassium) > 0 &&
+                Number(formData.temperature) > 0 && Number(formData.rainfall) > 0 &&
+                formData.state && formData.season;
+            if (canAnalyze) {
                 generateRecommendations();
+            } else {
+                setRecommendations([]);
+                setClimateZone('');
             }
         }, 500);
 
@@ -264,6 +279,9 @@ const CropRecommendation = () => {
                                                     onChange={handleInputChange}
                                                     className="form-control enhanced-select"
                                                 >
+                                                    <option value="" disabled>
+                                                        Select State / राज्य चुनें
+                                                    </option>
                                                     {Object.entries(INDIAN_STATES).map(([code, name]) => (
                                                         <option key={code} value={code}>{name} ({code})</option>
                                                     ))}
@@ -280,6 +298,9 @@ const CropRecommendation = () => {
                                                     onChange={handleInputChange}
                                                     className="form-control enhanced-select"
                                                 >
+                                                    <option value="" disabled>
+                                                        Select Season / मौसम चुनें
+                                                    </option>
                                                     {Object.entries(INDIAN_SEASONS).map(([key, season]) => (
                                                         <option key={key} value={key}>{season.name}</option>
                                                     ))}
@@ -464,29 +485,33 @@ const CropRecommendation = () => {
                             </div>
                         </div>
 
-                        {/* Climate Zone Card */}
-                        <div className="climate-zone-card card enhanced-card">
-                            <div className="card__body">
-                                <h4>🌍 कृषि जलवायु क्षेत्र | Agro-climatic Zone</h4>
-                                <div className="climate-zone-content">
-                                    <div className="climate-zone-icon">
-                                        {climateZone === 'Humid' && '🌴'}
-                                        {climateZone === 'Sub-Humid' && '🌳'}
-                                        {climateZone === 'Semi-Arid' && '🌾'}
-                                        {climateZone === 'Arid' && '🏜️'}
-                                        {!climateZone && '🌍'}
-                                    </div>
-                                    <div className="climate-zone-info">
-                                        <h5>{climateZone || 'Zone not determined'}</h5>
-                                        <p>
-                                            {climateZone
-                                                ? `आपका क्षेत्र ${climateZone} जलवायु क्षेत्र में वर्गीकृत है।`
-                                                : 'पूर्ण जानकारी दर्ज करें।'}
-                                        </p>
+                        {/* Climate Zone Card (only after required details) */}
+                        {(Number(formData.nitrogen) > 0 && Number(formData.phosphorus) > 0 && Number(formData.potassium) > 0 &&
+                          Number(formData.temperature) > 0 && Number(formData.rainfall) > 0 && formData.state && formData.season) && (
+                            <div className="climate-zone-card card enhanced-card">
+                                <div className="card__body">
+                                    <h4>🌍 कृषि जलवायु क्षेत्र | Agro-climatic Zone</h4>
+                                    <div className="climate-zone-content">
+                                        <div className="climate-zone-icon">
+                                            {climateZone === 'Humid' && '🌴'}
+                                            {climateZone === 'Sub-Humid' && '🌳'}
+                                            {climateZone === 'Semi-Arid' && '🌾'}
+                                            {climateZone === 'Arid' && '🏜️'}
+                                            {!climateZone && '🌍'}
+                                        </div>
+                                        <div className="climate-zone-info">
+                                            <h5>{climateZone || 'Zone not determined'}</h5>
+                                            <p>
+                                                {climateZone
+                                                    ? `आपका क्षेत्र ${climateZone} जलवायु क्षेत्र में वर्गीकृत है।`
+                                                    : 'पूर्ण जानकारी दर्ज करें।'}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
+
                     </div>
 
                     {/* Results Section */}

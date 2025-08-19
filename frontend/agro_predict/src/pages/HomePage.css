@@ -530,6 +530,80 @@
 	transform: translateX(4px);
 }
 
+/* About Section */
+.about-section {
+	padding: 100px 0;
+	background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.about-grid {
+	display: grid;
+	grid-template-columns: 1.2fr 1fr;
+	gap: 40px;
+	align-items: start;
+	margin-top: 40px;
+}
+
+.about-text {
+	background: white;
+	border: 1px solid rgba(0, 0, 0, 0.05);
+	border-radius: 16px;
+	padding: 24px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.about-paragraph {
+	color: #4a5568;
+	margin-bottom: 16px;
+	line-height: 1.7;
+}
+
+.about-list {
+	margin: 0;
+	padding-left: 18px;
+	color: #2d3748;
+	display: grid;
+	gap: 10px;
+}
+
+.about-cards {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 16px;
+}
+
+.about-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	background: white;
+	border: 1px solid rgba(0, 0, 0, 0.05);
+	border-radius: 14px;
+	padding: 16px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.about-card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.about-card-icon {
+	font-size: 1.6rem;
+}
+
+.about-card-title {
+	margin: 0 0 4px 0;
+	font-size: 1.05rem;
+	color: #2d3748;
+}
+
+.about-card-desc {
+	margin: 0;
+	color: #718096;
+}
+
 /* How It Works Section */
 .how-it-works-section {
 	padding: 100px 0;
@@ -820,6 +894,10 @@
 	.footer-content {
 		grid-template-columns: 1fr;
 		gap: 30px;
+	}
+
+	.about-grid {
+		grid-template-columns: 1fr;
 	}
 }
 

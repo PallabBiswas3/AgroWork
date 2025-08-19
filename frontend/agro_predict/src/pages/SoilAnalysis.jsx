@@ -8,14 +8,14 @@ const SoilAnalysis = () => {
   const [analysisEngine] = useState(new SoilAnalysisEngine());
 
   const [formData, setFormData] = useState({
-    nitrogen: '',
-    phosphorus: '',
-    potassium: '',
-    ph: '',
-    electricalConductivity: '',
-    organicCarbon: '',
-    temperature: '',
-    humidity: '',
+    nitrogen: '50',
+    phosphorus: '25',
+    potassium: '40',
+    ph: '6.5',
+    electricalConductivity: '0.8',
+    organicCarbon: '0.75',
+    temperature: '25',
+    humidity: '65',
     landArea: '1' // Added land area for cost calculations
   });
 

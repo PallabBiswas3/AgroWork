@@ -313,7 +313,7 @@ button, .btn {
 }
 
 .recommendation-summary .summary-card {
-  background: #F7FBF8;
+  background: #151c17;
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   padding: 1rem;
@@ -334,12 +334,14 @@ button, .btn {
 }
 
 .recommendation-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-light);
+  background: linear-gradient(135deg, #4e54c8, #8f94fb);
+  border: none;
   border-radius: var(--radius-md);
   padding: 1rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
+  color: #fff;
 }
+
 
 /* Add subtle match-based borders */
 .recommendation-card.high-match { border-color: rgba(56,142,60,0.35); }
@@ -395,7 +397,9 @@ button, .btn {
 .badge.low { background: rgba(211,47,47,0.1); color: var(--color-danger); }
 
 .rec-body { margin-top: 0.75rem; }
-.rec-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+/* Stack the detail rows top-down */
+.rec-details { display: grid; grid-template-columns: 1fr; gap: 0.35rem; }
+.rec-details .detail-item + .detail-item { margin-top: 0.25rem; }
 .rec-description { color: var(--color-text-light); }
 .rec-tips { margin-top: 0.5rem; }
 

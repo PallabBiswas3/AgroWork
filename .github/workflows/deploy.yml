@@ -26,17 +26,18 @@ jobs:
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
-      # Step 4: Build Docker image for frontend
-      - name: Build frontend Docker image
+      # Step 4: Install dependencies and build frontend
+      - name: Install dependencies and build
         run: |
           cd frontend/agro_predict
-          gcloud builds submit . --tag gcr.io/${{ vars.GCP_PROJECT_ID }}/frontend
+          npm install
+          npm run build
 
-      # Step 5: Deploy to Cloud Run
+      # Step 5: Deploy to Cloud Run using --source
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy frontend \
-            --image gcr.io/${{ vars.GCP_PROJECT_ID }}/frontend \
+            --source ./frontend/agro_predict \
             --platform managed \
             --region asia-south1 \
             --allow-unauthenticated

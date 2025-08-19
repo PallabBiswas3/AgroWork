@@ -297,9 +297,6 @@ const DiseasePredictor = () => {
       <div className="container">
         {/* Header */}
         <div className="page-header">
-          <button className="back-btn" onClick={() => navigate('/')}>
-            ← Back to Dashboard
-          </button>
           <h1>🔬 AI Disease Predictor</h1>
           <h2>बीमारी पूर्वानुमान प्रणाली</h2>
           <p>Advanced plant disease prediction system for Indian crops</p>

@@ -9,7 +9,8 @@ const SuccessStories = ({ stories = farmerData.successStories }) => {
     <section id="success-stories" className="success-stories">
       <div className="container">
         <h2 className="section-title">{t('financial.success.title')}</h2>
-        <p className="section-subtitle">{t('financial.success.subtitle')}</p>
+        <p className="section-subtitle">{t('financial.success.subtitle') + ' (Dummy)'}</p>
+
 
         <div className="stories__grid">
           {stories.map((story) => (

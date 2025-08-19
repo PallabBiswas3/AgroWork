@@ -482,20 +482,6 @@ export const farmerData = {
             location: "Jharkhand (Tribal)",
             story: "Van Dhan Kendra training helped me add value to mahua flowers. Now earning ₹15,000 monthly instead of ₹3,000.",
             image: "tribal_farmer1.jpg"
-        },
-        {
-            id: 5,
-            name: "Ramesh Patil",
-            location: "Maharashtra",
-            story: "Joined FPO through Ambuja Foundation support. Collective selling increased my cotton price by ₹800 per quintal.",
-            image: "fpo_farmer1.jpg"
-        },
-        {
-            id: 6,
-            name: "Kavitha Reddy",
-            location: "Karnataka",
-            story: "TCS mKrishi platform helped me get weather alerts and expert advice in Kannada. Saved my crop from pest attack.",
-            image: "tech_farmer1.jpg"
         }
     ],
 

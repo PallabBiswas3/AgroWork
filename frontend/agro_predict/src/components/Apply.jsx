@@ -152,9 +152,19 @@ const Apply = () => {
           <option value="PM_KISAN">PM Kisan Samman Nidhi</option>
           <option value="KCC">Kisan Credit Card</option>
           <option value="PMFBY">PM Fasal Bima Yojana</option>
-          <option value="SMAM">Agriculture Mechanization</option>
-          <option value="PKVY">Paramparagat Krishi</option>
+          <option value="SMAM">Agriculture Mechanization (SMAM)</option>
+          <option value="PKVY">Paramparagat Krishi Vikas Yojana</option>
         </select>
+      </div>
+      <div className="apply-guidelines">
+        <h4>General Application Instructions</h4>
+        <ul className="bullet-list">
+          <li><strong>Eligibility:</strong> Varies by scheme. Verify on the official portal or at your District Agriculture Office.</li>
+          <li><strong>Common documents:</strong> Aadhaar, bank passbook, mobile number, recent photo, land record or tenancy proof, and category certificate (if applicable).</li>
+          <li><strong>How to apply:</strong> Online via the official scheme portal, or offline at CSC/Bank/PACS/District Agriculture Office.</li>
+          <li><strong>Processing time:</strong> Typically 2–6 weeks depending on verification and bank processing.</li>
+          <li><strong>Tips:</strong> Ensure your IFSC and account number are correct, names match Aadhaar, and keep photocopies of all documents.</li>
+        </ul>
       </div>
       
       <div className="form-group">

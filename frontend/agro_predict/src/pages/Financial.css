@@ -1189,12 +1189,14 @@ body {
 }
 
 .story-card {
-  background: black;
+  background: #ffffff;
   padding: var(--space-20);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-top: 3px solid var(--gov-saffron);
+  color: #111827; /* dark text for readability */
 }
+
 
 .story-card__profile {
   display: flex;

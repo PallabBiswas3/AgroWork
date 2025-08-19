@@ -44,26 +44,7 @@ const SoilAnalysis = () => {
     }, 2000);
   };
 
-  const downloadReport = () => {
-    if (!analysisResults) return;
-
-    const reportData = {
-      timestamp: new Date().toISOString(),
-      farmDetails: { landArea: formData.landArea },
-      soilParameters: formData,
-      analysis: analysisResults
-    };
-
-    const dataStr = JSON.stringify(reportData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = `soil-analysis-report-${Date.now()}.json`;
-
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
+  
 
   // Icon components using SVG instead of react-icons
   const ArrowLeftIcon = () => (
@@ -178,23 +159,159 @@ const SoilAnalysis = () => {
     return icons[priority] || icons.medium;
   };
 
+  // Map fertility classification label to a color used by CSS variable --score-color
+  const getScoreColor = (label) => {
+    const key = (label || '').toLowerCase();
+    if (key.includes('optimal') || key.includes('good') || key.includes('high')) return '#22c55e';
+    if (key.includes('moderate') || key.includes('medium') || key.includes('average')) return '#f59e0b';
+    return '#ef4444';
+  };
+
+  // Build a simple printable HTML report (no external deps)
+  const buildReportHTML = () => {
+    if (!analysisResults) return '';
+    const ts = new Date().toLocaleString();
+    const params = formData;
+    const fert = analysisResults.fertilityScore;
+    const shi = analysisResults.soilHealthIndex;
+    const recs = analysisResults.recommendations || [];
+    const cb = analysisResults.costBenefit || {};
+
+    const section = (title, content) => `
+      <section style="margin:16px 0;">
+        <h2 style="margin:0 0 8px; font-size:18px;">${title}</h2>
+        ${content}
+      </section>`;
+
+    const table = (rows) => `
+      <table style="width:100%; border-collapse:collapse;">
+        ${rows
+          .map(
+            ([k, v]) => `
+              <tr>
+                <td style="border:1px solid #e5e7eb; padding:6px 8px; font-weight:600; background:#f8fafc;">${k}</td>
+                <td style="border:1px solid #e5e7eb; padding:6px 8px;">${v}</td>
+              </tr>`
+          )
+          .join('')}
+      </table>`;
+
+    const paramsTable = table([
+      ['Nitrogen (N)', `${params.nitrogen}`],
+      ['Phosphorus (P)', `${params.phosphorus}`],
+      ['Potassium (K)', `${params.potassium}`],
+      ['pH', `${params.ph}`],
+      ['Electrical Conductivity', `${params.electricalConductivity}`],
+      ['Organic Carbon', `${params.organicCarbon}%`],
+      ['Temperature', `${params.temperature} °C`],
+      ['Humidity', `${params.humidity}%`],
+      ['Land Area', `${params.landArea} ha`]
+    ]);
+
+    const fertilitySection = table([
+      ['Score', `${fert?.score}/100`],
+      ['Classification', `${fert?.classification?.label || '-'}`],
+      ['Action', `${fert?.classification?.action || '-'}`]
+    ]);
+
+    const shiTable = table([
+      ['Overall SHI', `${shi?.score || '-'}/100`],
+      ['Chemical', `${shi?.indicators?.chemical || '-'}/100`],
+      ['Physical', `${shi?.indicators?.physical || '-'}/100`],
+      ['Biological', `${shi?.indicators?.biological || '-'}/100`]
+    ]);
+
+    const recsHtml = `
+      <ol style="padding-left:18px; margin:0;">
+        ${recs
+          .map(
+            (r) => `
+              <li style="margin-bottom:8px;">
+                <div><strong>${r.message}</strong></div>
+                <div style="font-size:12px; color:#334155;">${r.details || ''}</div>
+                <div style="font-size:12px; color:#475569; margin-top:4px;">
+                  Priority: <strong>${r.priority?.toUpperCase?.() || '-'}</strong>
+                  ${r.cost ? ` | Cost: ₹${Number(r.cost).toLocaleString()}` : ''}
+                  ${r.timeline ? ` | Timeline: ${r.timeline}` : ''}
+                </div>
+              </li>`
+          )
+          .join('')}
+      </ol>`;
+
+    const cbTable = table([
+      ['Total Investment', cb.totalCost != null ? `₹${Number(cb.totalCost).toLocaleString()}` : '-'],
+      ['Expected Returns', cb.expectedReturn != null ? `₹${Number(cb.expectedReturn).toLocaleString()}` : '-'],
+      ['ROI', cb.roi != null ? `${cb.roi}x` : '-'],
+      ['Yield Increase', cb.yieldIncrease != null ? `${cb.yieldIncrease}%` : '-'],
+      ['Payback Period', cb.paybackPeriod != null ? `${cb.paybackPeriod} year(s)` : '-']
+    ]);
+
+    return `
+      <!doctype html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Soil Analysis Report</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color:#0f172a; margin:24px; }
+          h1 { margin: 0 0 4px; font-size: 24px; }
+          .muted { color:#475569; font-size: 12px; margin-bottom: 16px; }
+          hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
+        </style>
+      </head>
+      <body>
+        <h1>Soil Analysis Report</h1>
+        <div class="muted">Generated: ${ts}</div>
+        ${section('Farm Details', table([["Land Area", `${params.landArea} ha`]]))}
+        ${section('Soil Parameters', paramsTable)}
+        ${section('Fertility Score', fertilitySection)}
+        ${section('Soil Health Index', shiTable)}
+        ${section('Recommendations', recsHtml)}
+        ${section('Economic Summary', cbTable)}
+        <hr />
+        <div class="muted">AgroWork • Generated by the app</div>
+      </body>
+      </html>`;
+  };
+
+  // Trigger browser print dialog for PDF export (user can save as PDF)
+  const downloadReportPDF = () => {
+    if (!analysisResults) return;
+    const html = buildReportHTML();
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    // Wait a tick for layout, then print
+    setTimeout(() => {
+      win.focus();
+      win.print();
+    }, 300);
+  };
+
+  
+
   return (
     <div className="soil-analysis-container">
-      {/* Header */}
-      <div className="analysis-header">
-        <button className="btn btn--outline btn--back" onClick={() => navigate('/')}>
-          <ArrowLeftIcon /> Back to Dashboard
-        </button>
-        <div className="header-content">
-          <h1>🌱 Professional Soil Analysis</h1>
-          <p>Advanced soil fertility assessment with AI-powered recommendations</p>
+      {/* Hero Header */}
+      <header className="analysis-hero">
+        <div className="soil_hero-content">
+          <h1 className="hero-title">🌱 Professional Soil Analysis</h1>
+          <p className="hero-subtitle">Advanced soil fertility assessment with AI-powered recommendations</p>
+
         </div>
+
         {analysisResults && (
-          <button className="btn btn--secondary" onClick={downloadReport}>
-            <DownloadIcon /> Download Report
-          </button>
+          <div className="hero-actions">
+            <button className="btn btn--primary" onClick={downloadReportPDF}>
+              <DownloadIcon /> Download PDF
+            </button>
+          </div>
         )}
-      </div>
+      </header>
 
       {/* Navigation Tabs */}
       <div className="tab-navigation">
@@ -448,7 +565,13 @@ const SoilAnalysis = () => {
           <div className="fertility-dashboard">
             <div className="fertility-score-card">
               <div className="score-display">
-                <div className={`score-circle ${analysisResults.fertilityScore.classification.label.toLowerCase().replace(' ', '-')}`}>
+                <div
+                  className={`score-circle ${analysisResults.fertilityScore.classification.label.toLowerCase().replace(' ', '-')}`}
+                  style={{
+                    ['--score']: analysisResults.fertilityScore.score,
+                    ['--score-color']: getScoreColor(analysisResults.fertilityScore.classification.label)
+                  }}
+                >
                   <span className="score-number">{analysisResults.fertilityScore.score}</span>
                   <span className="score-suffix">/100</span>
                 </div>

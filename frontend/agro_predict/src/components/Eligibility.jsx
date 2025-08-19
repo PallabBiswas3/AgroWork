@@ -117,6 +117,21 @@ const Eligibility = () => {
       addScheme('RYTHU_BANDHU', 'Small/marginal farmers benefit more from per-acre/state support where applicable.');
     }
 
+    // Soil Health Card (useful for all farmers)
+    if (isFarmerBool) {
+      addScheme('SOIL_HEALTH_CARD', 'All farmers can obtain a Soil Health Card every 2-3 years to guide balanced fertiliser use.');
+    }
+
+    // e-NAM (market linkage)
+    if (isFarmerBool) {
+      addScheme('eNAM', 'Eligible to register on e-NAM for better market access and transparent pricing.');
+    }
+
+    // AIF (Agricultural Infrastructure Fund) – conservative suggestion when farmer has land
+    if (isFarmerBool && hasLand) {
+      addScheme('AIF', 'If planning post-harvest or farm-gate infrastructure, you can explore AIF with 3% interest subvention.');
+    }
+
     setResults({
       eligibleSchemes,
       totalEligible: eligibleSchemes.length,

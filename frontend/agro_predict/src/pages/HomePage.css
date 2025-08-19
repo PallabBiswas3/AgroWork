@@ -265,6 +265,7 @@
 	position: relative;
 	z-index: 2;
 	max-width: 1200px;
+	flex-direction: row;
 	margin: 0 auto;
 	padding: 0 20px;
 	display: grid;

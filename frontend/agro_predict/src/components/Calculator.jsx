@@ -303,8 +303,17 @@ const Calculator = () => {
                 <div className="result-item">
                   <span className="result-label">{t('financial.calculator.result_farmer_type')}</span>
                   <span className="result-value">
-                    {results.farmerType === 'small' ? t('financial.calculator.type_small') : 
-                     results.farmerType === 'medium' ? t('financial.calculator.type_medium') : t('financial.calculator.type_large')}{t('financial.calculator.type_suffix_farmer')}
+                    {
+                      (
+                        results.farmerType === 'small' ? t('financial.calculator.farmer_small') :
+                        results.farmerType === 'medium' ? t('financial.calculator.farmer_medium') :
+                        results.farmerType === 'large' ? t('financial.calculator.farmer_large') :
+                        results.farmerType === 'tribal_small' ? t('financial.calculator.farmer_tribal_small') :
+                        results.farmerType === 'marginal_woman' ? t('financial.calculator.farmer_marginal_woman') :
+                        results.farmerType === 'tenant_farmer' ? t('financial.calculator.farmer_tenant') :
+                        results.farmerType
+                      )
+                    }
                   </span>
                 </div>
               </div>
